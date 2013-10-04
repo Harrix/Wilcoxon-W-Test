@@ -1,0 +1,597 @@
+\documentclass[a4paper,12pt]{article}
+
+\input{packages}
+\input{styles}
+
+\title{Критерий Вилкоксона W для проверки однородности выборок. v. 1.0}
+\author{А.\,Б. Сергиенко}
+\date{\today}
+
+
+\begin{document}
+
+\input{names}
+
+\maketitle
+
+\begin{abstract}
+В данном документе дано описание критерия Вилкосона W по справочнику <<Таблицы математической статистики>> \cite[с. 93]{book:Bolshev1983} и методика его применения.
+\end{abstract}
+
+\tableofcontents
+
+\newpage
+
+\section{Введение}
+
+Критерий Вилкосона W берется из справочника <<Таблицы математической статистики>> \cite[с. 93]{book:Bolshev1983}.
+
+Данный документ представляет его версию 1.0 от \today
+
+Последнюю версию документа можно найти по адресу:
+
+\href{https://github.com/Harrix/Wilcoxon-W-Test}{https://github.com/Harrix/Wilcoxon-W-Test}
+
+Программу для проверки двух выборок по критерию Вилкосона можно найти тут:
+
+\href{https://github.com/Harrix/HarrixWilcoxonW}{https://github.com/Harrix/HarrixWilcoxonW}
+
+Реализация алгоритма критерия Вилкосона можно найти в авторской библиотеке HarrixMathLibrary в виде функции MHL\_WilcoxonW на языке C++:
+
+\href{https://github.com/Harrix/HarrixMathLibrary}{https://github.com/Harrix/HarrixMathLibrary}
+
+С автором можно связаться по адресу \href{mailto:sergienkoanton@mail.ru}{sergienkoanton@mail.ru} или  \href{http://vk.com/harrix}{http://vk.com/harrix}.
+
+Сайт автора, где публикуются последние новости: \href{http://blog.harrix.org/}{http://blog.harrix.org/}, а проекты располагаются по адресу \href{http://harrix.org/}{http://harrix.org/}.
+
+\section{Для чего использовать}
+
+Часто этот критерий используют, чтобы сравнить две методики (или два способа производства чего-то и др.), и  сказать, что одна методика (или способ и др.)  лучше другой. Например, в своем исследовании человек предлагает новый алгоритм оптимизации, который по его предположению лучшего старого, или предлагает новый способ выплавки стали, и хочет показать, что он лучше старого способа.
+
+Сравнивают две методики (два способа и др.) по некоторому параметру. При этом сравнить две методики по единичному эксперименту нельзя, так как любая разница между значениями параметра может лежать в области статистической ошибки. Нужно провести некоторое множество экспериментов с одной и другой методикой, и после две полученные выборки сравнить. Критерий Вилкосона служит для сравнения этих двух выборок, при условии, что мы не знаем законы распределения (что чаще всего и бывает) случайных величин, по которым выборки формировались.
+
+\section{Постановка задачи}
+
+Имеется две выборки:
+\begin{eqnarray}
+\bar{a} &=& \left(  a_1, a_2, \ldots, a_m\right)^\mathrm{T} ,\\
+\bar{b} &=& \left(  b_1, b_2, \ldots, y_n\right)^\mathrm{T} .\nonumber
+\end{eqnarray}
+
+При этом $\bar{a}_i\in \mathbb{R}$, $i=\overline{1,m}$, $\bar{b}_j\in \mathbb{R}$, $j=\overline{1,n}$. Предполагается, что $m\leq n$. Если $m > n$, то меняем выборки местами.
+
+Выдвигается гипотеза об однородности выборок:
+\begin{equation}
+H_0: P(a<x)\equiv P(b<x), \left( \left| x \right| <  \infty \right). 
+\end{equation}
+
+$a$ --- случайное число того же закона распределения, что и элементы выборки $\bar{a}$; $b$ соотвественно определяется для выборки $\bar{b}$; $P(a<x)$, $P(b<x)$ --- функции распределения случайных величин соответствующих выборок.
+
+То есть проверяется гипотеза о равенстве законов распределения выборок. Если гипотеза при выбранном уровне значимости $ Q $ подтвердится, то делается вывод, что выборки $\bar{a}$ и $\bar{b}$ были сформированы по одному и тому же закону распределения случайных чисел, а, значит, системы, которые генерировали данные выборки по данному параметру не отличаются с точки зрения выбранного уровня значимости. Например, если рассматривалось сравнение двух алгоритмов: старого и нового, то это означает, что алгоритмы не отличаются друг от друга. В противном случае можно говорить о статистическом различии алгоритмов.
+
+\section{Методика применения критерия}\label{WilcoxonW:section_method}
+
+Опишем методику применения критерия, сопровождая каждый шаг примером. Пусть, решаем для примера задачу сравнения двух алгоритмов $A$ и $B$ по некоторому параметру эффективности $E$, в результате чего получили выборки для алгоритмов $A$ и $B$ соответственно:
+\begin{eqnarray*}
+\bar{a}&=&\left\lbrace 50; 41; 45; 12; 74; 56\right\rbrace ;\\
+\bar{b}&=&\left\lbrace 13; 78; 50; 50; 46; 70; 90\right\rbrace .
+\end{eqnarray*}
+
+При этом $m=6$, $n=7$.
+
+\begin{enumerate}
+\item \textbf{Сформировать объединенный массив из двух выборок}.
+Формируем объединенный массив $D$ как множество кортежей:
+\begin{eqnarray*}
+D&=&\left\lbrace \left( z^k; s^k\right) \right\rbrace, k=\overline{1,m+n};\\
+z^k&=&\left\lbrace \begin{aligned} a_k,& \text{ если } k=\overline{1,m}; \\ b_{k-m},& \text{ если } k=\overline{m+1,m+n}. \end{aligned}\right.\nonumber\\
+s^k&=&\left\lbrace \begin{aligned} 1,& \text{ если } k=\overline{1,m}; \\ 2,& \text{ если } k=\overline{m+1,m+n}. \end{aligned}\right.\nonumber
+\end{eqnarray*}
+
+Фактически мы берем все элементы первой выборки и приписываем к ним номер выборки, а именно $1$. Потом добавляем элементы второй выборки и приписываем к ним номер второй выборки, а именно $2$. Для рассмотренного выше примера получим:
+\begin{eqnarray*}
+D&=&\left\lbrace \left( 50; 1\right) ; \left( 41; 1\right) ; \left( 45; 1\right) ; \left( 12; 1\right) ; \left( 74; 1\right) ; \left( 56; 1\right); \right. \\
+ & &\left. \left( 13; 2\right) ; \left( 78; 2\right) ; \left( 50; 2\right) ; \left( 50; 2\right) ; \left( 46; 2\right) ; \left( 70; 2\right) ; \left( 90; 2\right) \right\rbrace .
+\end{eqnarray*}
+
+\item \textbf{Отсортировать объединенный массив в порядке возрастания}.
+
+Сортировка производится в порядке возрастания значений $ z_k $ ($k=\overline{1,m+n}$).
+
+В нашем примере получим следующее упорядоченное множество:
+\begin{eqnarray*}
+D^*&=&\left\langle  \left( 12; 1\right);  \left( 13; 2\right); \left( 41; 1\right) ; \left( 45; 1\right) ; \left( 46; 2\right) ;\left( 50; 1\right) ;    \right. \\
+ & &\left.\left( 50; 2\right) ; \left( 50; 2\right) ; \left( 56; 1\right); \left( 70; 2\right) ;  \left( 74; 1\right) ; \left( 78; 2\right) ; \left( 90; 2\right) \right\rangle  .
+\end{eqnarray*}
+
+
+\item \textbf{Проставить ранги элементам объединенного массива}.
+Присвоим ранги каждому элементу в упорядоченном множестве $ D^* $, где ранг $ r^k $ ($ k=\overline{1,m+n} $) равен номеру кортежа в $ D^* $. Получим множество $ D^{**} =\left\lbrace \left( z^k; s^k; r^k\right) \right\rbrace, k=\overline{1,m+n}$.
+
+Для примера получим:
+\begin{eqnarray*}
+D^{**}&=&\left\langle  \left( 12; 1; 1\right);  \left( 13; 2; 2\right); \left( 41; 1; 3\right) ; \left( 45; 1; 4 \right) ; \left( 46; 2; 5\right) ;\left( 50; 1; 6\right) ;    \right. \\
+ & &\left.\left( 50; 2; 7\right) ; \left( 50; 2; 8\right) ; \left( 56; 1; 9\right); \left( 70; 2; 10 \right) ;  \left( 74; 1; 11\right) ; \left( 78; 2; 12\right) ; \left( 90; 2; 13\right) \right\rangle  .
+\end{eqnarray*}
+
+Для одинаковых элементов с одинаковым значениям первой компоненты (одинаковые значения в первоначальных выборках) ранги пересчитаем, как среднеарифметические ранги этих элементов (при этом могут получаться дробные значения). Получим множество $ D^{***} =\left\lbrace \left( z^k; s^k; r^k\right) \right\rbrace, k=\overline{1,m+n}$.
+
+В примере есть одна группа элементов, одинаковых по первой компоненте: $\left( 50; 1; 6\right); \left( 50; 2; 7\right) ; \left( 50; 2; 8\right)$. Присвоим каждому из элементов ранги, равные:
+\begin{equation*}
+\dfrac{6+7+8}{3}=7.
+\end{equation*}
+
+В итоге получим множество:
+\begin{eqnarray*}
+D^{***}&=&\left\langle  \left( 12; 1; 1\right);  \left( 13; 2; 2\right); \left( 41; 1; 3\right) ; \left( 45; 1; 4 \right) ; \left( 46; 2; 5\right) ;\left( 50; 1; 7\right) ;    \right. \\
+ & &\left.\left( 50; 2; 7\right) ; \left( 50; 2; 7\right) ; \left( 56; 1; 9\right); \left( 70; 2; 10 \right) ;  \left( 74; 1; 11\right) ; \left( 78; 2; 12\right) ; \left( 90; 2; 13\right) \right\rangle  .
+\end{eqnarray*}
+
+\item \textbf{Посчитать значение статистики $W$}.
+В качестве статистики $W$ критерия Вилкосона используется сумма рангов из $ D^{***}$ элементов выборки с меньшим количеством элементов, то есть первой выборки:
+\begin{equation}
+W = \sum_{k=1}^{m+n}{r^k\cdot \left( 2 - s^k\right) }
+\end{equation}
+
+Множитель $ \left( 2 - s^k\right) $ используется таким, потому что при $ s^k = 2$ (элементы второй выборки) получим $ \left( 2 - s^k\right) = 0$, и ранги второй выборки не будут суммироваться. А при $ s^k = 1$ (элементы первой выборки) получим $ \left( 2 - s^k\right) = 1$, и ранги первой выборки будут учитываться, умножаясь на $1$. 
+
+При программировании критерия или при ручном подсчете можно не использовать эту формулу, а только сложить ранги элементов первой выборки.
+
+В рассматриваемом примере получим:
+\begin{equation*}
+W=1+ 3+4+7+9+11 = 35.
+\end{equation*}
+
+\item \textbf{Выберем уровень значимости}.
+
+Уровень значимости $ Q $ --- вероятность отклонить гипотезу $ H_0 $, если на самом деле она верна (ошибка первого рода).
+
+Выбрать значение значимости можно из следующих значений:
+\begin{eqnarray}
+\label{WilcoxonW:eq:Q}
+Q &=& 0.002;\\
+Q &=& 0.01; \nonumber\\
+Q &=& 0.02; \nonumber\\
+Q &=& 0.05;\nonumber\\ 
+Q &=& 0.1; \nonumber\\
+Q &=& 0.2.\nonumber
+\end{eqnarray}
+
+При уменьшении значения $Q$ критические границы статистики $W$ будут <<разъезжаться>>, потому что, если выборки  однородны на самом деле, то нам с меньшей вероятностью разрешено пропустить подтверждение их однородности, и поэтому мы увеличиваем <<площадку>> для <<ловли>> однородности. При этом при большой разнице выборок по статистике $W$ мы подтвердим однородность выборок.
+
+Для большего понимания рассмотрим критические значения $Q$, которые не участвуют в методике применения критерия Вилкосона, но помогут лучше разобраться в принципе выставления критических границ статистики $ W $. 
+
+Если $Q=0$, то нам никогда нельзя ошибиться и сказать, что выборки неоднородны, хотя на самом деле они однородны. Поэтому мы всегда будем говорит, что выборки однородны. С точки зрения критических границ статистики  $W$, это будет означать, что границы будут максимально разнесены, и какое бы значение статистики  $W$ мы не подсчитали в критерии, то всегда оно попадет в границы интервала.
+
+Если $Q=1$, то мы можем всегда ошибаться в однородности выборок, поэтому для критических границ статистики $W$ можем указать самые узкие значения.
+
+Теперь рассмотрим рекомендации для применяемых значений $Q$.  
+
+Если хотим, чтобы <<с максимальной точностью>> (в смысле рассматриваемого множества значений $Q$) проверить наличие неоднородности между выборками, то выбираем $Q = 0.002$. Если при данном уровне критерий выдаст результат, что выборки неоднородны, то при других значений Q (\ref{WilcoxonW:eq:Q}) и подавно будет подтверждено наличие неоднородности.  Например, нам нужно показать, что новый алгоритм оптимизации очень хорош и точно отличается от старого алгоритма.
+
+Если хотим, чтобы с большей вероятностью было сказано, что выборки неоднородны (например, сравниваемые алгоритмы оптимизации довольно похожи, но нам нужно показать, что различия есть), то выбираем значение $Q = 0.2$. При этом критические границы статистики $W$ будут максимально (в смысле рассматриваемого множества значений $Q$) сжаты.
+
+Для рассматриваемого примера выберем $ Q=0.05 $.
+
+\item \textbf{Получить критические границы статистики $W$}.
+
+Если $m\leq 25$ и $n\leq 25$, то критические границы $W_{Left}$, $W_{Right}$ статистики $W$ получаем из Таблицы \ref{WilcoxonW:Table}, где для разных размеров выборки и уровня значимости даны значения критических границ. Если для какого-то набора значений размеров выборки и уровня значимости нет данных, то значит, что с указанным уровнем значимости провести проверку гипотезы не представляется возможным.
+
+Если $m > 25$ или  $n > 25$ (при этом $m,n \geq 5$), то используем приближенные формулы  \cite[с. 95]{book:Bolshev1983}:
+\begin{eqnarray}
+W_{Left}&\approx& int \left( \dfrac{m\left( m+n+1\right)-1 }{2} - \Psi\left( 1-Q\right)\cdot\sqrt{\dfrac{mn\left( m+n+1\right) }{12}} \right);\\
+W_{Right}&\approx& m\left( m+n+1\right) - W_{Left}.
+\end{eqnarray}
+
+Тут $ \Psi\left( 1-Q\right) $ --- значение обратной функции нормального распределения с параметрами $ \left( 0, 1\right)  $. Так как мы рассматриваем шесть различных уровня значимости, то ниже даны значения $ \Psi\left( 1-Q\right) $ для этих шести значений $Q$\cite[с. 136]{book:Bolshev1983}:
+\begin{eqnarray}
+\label{WilcoxonW:eq:Psi}
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.002\right) =\Psi\left( 0.999\right) = 3.090232;\\
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.010 \right) =\Psi\left( 0.995\right) =  2.575829; \nonumber\\
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.020\right) =\Psi\left( 0.990\right) = 2.326348 ; \nonumber\\
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.050\right) = \Psi\left( 0.975\right) = 1.959964;\nonumber\\ 
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.100\right) =  \Psi\left( 0.950\right) = 1.644854;\nonumber\\
+\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.200\right) = \Psi\left( 0.900\right) = 1.281552.\nonumber
+\end{eqnarray}
+
+Обратите внимание, что для случая, когда $m > 25$, а  $n < 5$ (или наоборот), в данной работе не приводятся данные о сравнении таких выборок. Табличные данные отсутствуют, а предложенные формулы недостаточно точны для таких объемов выборок. 
+
+В рассматриваемом примере $m=6$, $n=7$, поэтому критические значения статистики находим по Таблице \ref{WilcoxonW:Table} при $Q=0.05$:
+\begin{eqnarray*}
+W_{Left}& = & 27;\\
+W_{Right}& = & 57 .
+\end{eqnarray*}
+
+\item \textbf{Сделать вывод по проверке гипотезы}.
+
+Если $W \in \left[ W_{Left}; W_{Right}\right] $, то делаем вывод, что при уровне значимости $Q$ выборки \textbf{однородны} по критерию Вилкосона W.
+
+Если $W \notin \left[ W_{Left}; W_{Right}\right] $, то делаем вывод, что при уровне значимости $Q$ выборки \textbf{неоднородны} по критерию Вилкосона W.
+
+В рассматриваемом примере $W=35$, и это значение попадает в интервал  $\left[ 27; 57\right] $. Поэтому делаем вывод, что при $ Q=0.05 $ выборки $ \bar{a} $ и $ \bar{b} $ однородны. Поэтому два алгоритмов $A$ и $B$ при параметру $E$ статистически неразличимы.
+
+\item \textbf{Сравнить среднеарифметические значения при неоднородности выборок}. Данный шаг не обязателен.
+
+В случае, когда мы сравниваем, например, два алгоритма, кроме вывода о неоднородности выборок нам нужен вывод о том, какой алгоритм лучше. Для этого сравниваем средние арифметические выборок и делаем вывод о том, какая из выборок по параметру <<лучше>> или <<хуже>> согласно смыслу, вкладываемого в параметр, который заключен в выборках.
+
+\end{enumerate}
+
+\section{Применения критерия для случая с несколькими выборками}\label{WilcoxonW:section_samples}
+
+Предлагается следующая методика для случая, когда нужно сравнить не две, а несколько выборок:
+\begin{equation}
+As = \left\lbrace \bar{a}^1; \bar{a}^2; \ldots; \bar{a}^N; \right\rbrace.
+\end{equation}
+
+Тут $ N>2 $, $ \bar{a}^j=\left(\bar{a}^j_1 ;\bar{a}^j_2;\ldots;\bar{a}^j_{m_j} \right)^\mathrm{T} $, $ j=\overline{1,N}$. Итак, каждая выборка имеет $ m_j $ элементов.
+
+Рассматривается случай, когда нужно выбрать выборку с максимальным значением параметра и определить статистическое различие с другими выборками.
+
+\begin{enumerate}
+\item \textbf{Вычислить для каждой выборки среднее арифметическое}.
+\begin{equation}
+a^j_{\text{ср}}=\dfrac{\sum_{i=1}^{m_j} \bar{a}^j_{i}}{m_j}, j=\overline{1,N}.
+\end{equation}
+
+\item \textbf{Выбрать выборку с максимальным значением среднего арифметического}.
+\begin{equation}
+\bar{a}^{max}=\bar{a}^{k},
+\end{equation}
+\begin{equation*}
+k=\arg {\max_{j} {a^j_{\text{ср}}}}, j=\overline{1,N}.
+\end{equation*}
+
+\item \textbf{Сравнить по критерию Вилкосона данную выборку со всеми остальными выборками}.
+
+\item \textbf{Сделать вывод о сравнении выборок}.
+
+Если по всем выборкам выборка $\bar{a}^{max}$ неоднородна, то делается вывод неоднородности выборки по отношению ко всем остальным. Если выборки обозначают эффективность алгоритмов, то алгоритм, который соотвествует выборке $\bar{a}^{max}$, статистически различен по отношению к другим алгоритмам.
+
+Другие варианты пока не рассматриваются в данной методике.
+\end{enumerate}
+
+Аналогично рассматривается случай, когда нужно выбрать выборку с минимальным значением параметра и определить статистическое различие с другими выборками.
+
+\newpage
+\section{Табличные значения критических значений}\label{WilcoxonW:section_table}
+
+В таблице ниже даны критические значения статистики W для опреденных размеров выборок.
+
+\begin{center}
+{\renewcommand{\arraystretch}{1.5}
+\footnotesize\begin{longtable}[H]{|c|c|c|c|c|c|c|c|}
+\caption{Нижние и верхние критические значения статистики W критерия Вилкосона}
+\label{WilcoxonW:Table}
+\tabularnewline \hline
+ &       & \multicolumn{6}{c|} {$\bm{Q}$}  \centering
+\tabularnewline \cline{3-8}
+\multirow{-2}{*}{$\bm{m}$} & \multirow{-2}{*}{$\bm{n}$} & \textbf{0.002} &  \textbf{0.01} & \textbf{ 0.02}  &  \textbf{0.05} &  \textbf{0.1} &  \textbf{0.2}\tabularnewline \hline \endhead
+\multicolumn{8}{|r|}{{Продолжение на следующей странице...}} \\ \hline \endfoot
+\endlastfoot 
+1 &  9 &   &   &   &   &   &  $\left[ 1; 10\right]$ \tabularnewline \hline
+1 &  10 &   &   &   &   &   &  $\left[ 1; 11\right]$ \tabularnewline \hline
+1 &  11 &   &   &   &   &   &  $\left[ 1; 12\right]$ \tabularnewline \hline
+1 &  12 &   &   &   &   &   &  $\left[ 1; 13\right]$ \tabularnewline \hline
+1 &  13 &   &   &   &   &   &  $\left[ 1; 14\right]$ \tabularnewline \hline
+1 &  14 &   &   &   &   &   &  $\left[ 1; 15\right]$ \tabularnewline \hline
+1 &  15 &   &   &   &   &   &  $\left[ 1; 16\right]$ \tabularnewline \hline
+1 &  16 &   &   &   &   &   &  $\left[ 1; 17\right]$ \tabularnewline \hline
+1 &  17 &   &   &   &   &   &  $\left[ 1; 18\right]$ \tabularnewline \hline
+1 &  18 &   &   &   &   &   &  $\left[ 1; 19\right]$ \tabularnewline \hline
+1 &  19 &   &   &   &   &  $\left[ 1; 20\right]$ &  $\left[ 2; 19\right]$ \tabularnewline \hline
+1 &  20 &   &   &   &   &  $\left[ 1; 21\right]$ &  $\left[ 2; 20\right]$ \tabularnewline \hline
+1 &  21 &   &   &   &   &  $\left[ 1; 22\right]$ &  $\left[ 2; 21\right]$ \tabularnewline \hline
+1 &  22 &   &   &   &   &  $\left[ 1; 23\right]$ &  $\left[ 2; 22\right]$ \tabularnewline \hline
+1 &  23 &   &   &   &   &  $\left[ 1; 24\right]$ &  $\left[ 2; 23\right]$ \tabularnewline \hline
+1 &  24 &   &   &   &   &  $\left[ 1; 25\right]$ &  $\left[ 2; 24\right]$ \tabularnewline \hline
+1 &  25 &   &   &   &   &  $\left[ 1; 26\right]$ &  $\left[ 2; 25\right]$ \tabularnewline \hline
+2 &  3 &   &   &   &   &   &  $\left[ 3; 9\right]$ \tabularnewline \hline
+2 &  4 &   &   &   &   &   &  $\left[ 3; 11\right]$ \tabularnewline \hline
+2 &  5 &   &   &   &   &  $\left[ 3; 13\right]$ &  $\left[ 4; 12\right]$ \tabularnewline \hline
+2 &  6 &   &   &   &   &  $\left[ 3; 15\right]$ &  $\left[ 4; 14\right]$ \tabularnewline \hline
+2 &  7 &   &   &   &   &  $\left[ 3; 17\right]$ &  $\left[ 4; 16\right]$ \tabularnewline \hline
+2 &  8 &   &   &   &  $\left[ 3; 19\right]$ &  $\left[ 4; 18\right]$ &  $\left[ 5; 17\right]$ \tabularnewline \hline
+2 &  9 &   &   &   &  $\left[ 3; 21\right]$ &  $\left[ 4; 20\right]$ &  $\left[ 5; 19\right]$ \tabularnewline \hline
+2 &  10 &   &   &   &  $\left[ 3; 23\right]$ &  $\left[ 4; 22\right]$ &  $\left[ 6; 20\right]$ \tabularnewline \hline
+2 &  11 &   &   &   &  $\left[ 3; 25\right]$ &  $\left[ 4; 24\right]$ &  $\left[ 6; 22\right]$ \tabularnewline \hline
+2 &  12 &   &   &   &  $\left[ 4; 26\right]$ &  $\left[ 5; 25\right]$ &  $\left[ 7; 23\right]$ \tabularnewline \hline
+2 &  13 &   &   &  $\left[ 3; 29\right]$ &  $\left[ 4; 28\right]$ &  $\left[ 5; 27\right]$ &  $\left[ 7; 25\right]$ \tabularnewline \hline
+2 &  14 &   &   &  $\left[ 3; 31\right]$ &  $\left[ 4; 30\right]$ &  $\left[ 6; 28\right]$ &  $\left[ 8; 26\right]$ \tabularnewline \hline
+2 &  15 &   &   &  $\left[ 3; 33\right]$ &  $\left[ 4; 32\right]$ &  $\left[ 6; 30\right]$ &  $\left[ 8; 28\right]$ \tabularnewline \hline
+2 &  16 &   &   &  $\left[ 3; 35\right]$ &  $\left[ 4; 34\right]$ &  $\left[ 6; 32\right]$ &  $\left[ 8; 30\right]$ \tabularnewline \hline
+2 &  17 &   &   &  $\left[ 3; 37\right]$ &  $\left[ 5; 35\right]$ &  $\left[ 6; 34\right]$ &  $\left[ 9; 31\right]$ \tabularnewline \hline
+2 &  18 &   &   &  $\left[ 3; 39\right]$ &  $\left[ 5; 37\right]$ &  $\left[ 7; 35\right]$ &  $\left[ 9; 33\right]$ \tabularnewline \hline
+2 &  19 &   &  $\left[ 3; 41\right]$ &  $\left[ 4; 40\right]$ &  $\left[ 5; 39\right]$ &  $\left[ 7; 37\right]$ &  $\left[ 10; 34\right]$ \tabularnewline \hline
+2 &  20 &   &  $\left[ 3; 43\right]$ &  $\left[ 4; 42\right]$ &  $\left[ 5; 41\right]$ &  $\left[ 7; 39\right]$ &  $\left[ 10; 36\right]$ \tabularnewline \hline
+2 &  21 &   &  $\left[ 3; 45\right]$ &  $\left[ 4; 44\right]$ &  $\left[ 6; 42\right]$ &  $\left[ 8; 40\right]$ &  $\left[ 11; 37\right]$ \tabularnewline \hline
+2 &  22 &   &  $\left[ 3; 47\right]$ &  $\left[ 4; 46\right]$ &  $\left[ 6; 44\right]$ &  $\left[ 8; 42\right]$ &  $\left[ 11; 39\right]$ \tabularnewline \hline
+2 &  23 &   &  $\left[ 3; 49\right]$ &  $\left[ 4; 48\right]$ &  $\left[ 6; 46\right]$ &  $\left[ 8; 44\right]$ &  $\left[ 12; 40\right]$ \tabularnewline \hline
+2 &  24 &   &  $\left[ 3; 51\right]$ &  $\left[ 4; 50\right]$ &  $\left[ 6; 48\right]$ &  $\left[ 9; 45\right]$ &  $\left[ 12; 42\right]$ \tabularnewline \hline
+2 &  25 &   &  $\left[ 3; 53\right]$ &  $\left[ 4; 52\right]$ &  $\left[ 6; 50\right]$ &  $\left[ 9; 47\right]$ &  $\left[ 12; 44\right]$ \tabularnewline \hline
+3 &  3 &   &   &   &   &  $\left[ 6; 15\right]$ &  $\left[ 7; 14\right]$ \tabularnewline \hline
+3 &  4 &   &   &   &   &  $\left[ 6; 18\right]$ &  $\left[ 7; 17\right]$ \tabularnewline \hline
+3 &  5 &   &   &   &  $\left[ 6; 21\right]$ &  $\left[ 7; 20\right]$ &  $\left[ 8; 19\right]$ \tabularnewline \hline
+3 &  6 &   &   &   &  $\left[ 7; 23\right]$ &  $\left[ 8; 22\right]$ &  $\left[ 9; 21\right]$ \tabularnewline \hline
+3 &  7 &   &   &  $\left[ 6; 27\right]$ &  $\left[ 7; 26\right]$ &  $\left[ 8; 25\right]$ &  $\left[ 10; 23\right]$ \tabularnewline \hline
+3 &  8 &   &   &  $\left[ 6; 30\right]$ &  $\left[ 8; 28\right]$ &  $\left[ 9; 27\right]$ &  $\left[ 11; 25\right]$ \tabularnewline \hline
+3 &  9 &   &  $\left[ 6; 33\right]$ &  $\left[ 7; 32\right]$ &  $\left[ 8; 31\right]$ &  $\left[ 10; 29\right]$ &  $\left[ 11; 28\right]$ \tabularnewline \hline
+3 &  10 &   &  $\left[ 6; 36\right]$ &  $\left[ 7; 35\right]$ &  $\left[ 9; 33\right]$ &  $\left[ 10; 32\right]$ &  $\left[ 12; 30\right]$ \tabularnewline \hline
+3 &  11 &   &  $\left[ 6; 39\right]$ &  $\left[ 7; 38\right]$ &  $\left[ 9; 36\right]$ &  $\left[ 11; 34\right]$ &  $\left[ 13; 32\right]$ \tabularnewline \hline
+3 &  12 &   &  $\left[ 7; 41\right]$ &  $\left[ 8; 40\right]$ &  $\left[ 10; 38\right]$ &  $\left[ 11; 37\right]$ &  $\left[ 14; 34\right]$ \tabularnewline \hline
+3 &  13 &   &  $\left[ 7; 44\right]$ &  $\left[ 8; 43\right]$ &  $\left[ 10; 41\right]$ &  $\left[ 12; 39\right]$ &  $\left[ 15; 36\right]$ \tabularnewline \hline
+3 &  14 &   &  $\left[ 7; 47\right]$ &  $\left[ 8; 46\right]$ &  $\left[ 11; 43\right]$ &  $\left[ 13; 41\right]$ &  $\left[ 16; 38\right]$ \tabularnewline \hline
+3 &  15 &   &  $\left[ 8; 49\right]$ &  $\left[ 9; 48\right]$ &  $\left[ 11; 46\right]$ &  $\left[ 13; 44\right]$ &  $\left[ 16; 41\right]$ \tabularnewline \hline
+3 &  16 &   &  $\left[ 8; 52\right]$ &  $\left[ 9; 51\right]$ &  $\left[ 12; 48\right]$ &  $\left[ 14; 46\right]$ &  $\left[ 17; 43\right]$ \tabularnewline \hline
+3 &  17 &  $\left[ 6; 57\right]$ &  $\left[ 8; 55\right]$ &  $\left[ 10; 53\right]$ &  $\left[ 12; 51\right]$ &  $\left[ 15; 48\right]$ &  $\left[ 18; 45\right]$ \tabularnewline \hline
+3 &  18 &  $\left[ 6; 60\right]$ &  $\left[ 8; 58\right]$ &  $\left[ 10; 56\right]$ &  $\left[ 13; 53\right]$ &  $\left[ 15; 51\right]$ &  $\left[ 19; 47\right]$ \tabularnewline \hline
+3 &  19 &  $\left[ 6; 63\right]$ &  $\left[ 9; 60\right]$ &  $\left[ 10; 59\right]$ &  $\left[ 13; 56\right]$ &  $\left[ 16; 53\right]$ &  $\left[ 20; 49\right]$ \tabularnewline \hline
+3 &  20 &  $\left[ 6; 66\right]$ &  $\left[ 9; 63\right]$ &  $\left[ 11; 61\right]$ &  $\left[ 14; 58\right]$ &  $\left[ 17; 55\right]$ &  $\left[ 21; 51\right]$ \tabularnewline \hline
+3 &  21 &  $\left[ 7; 68\right]$ &  $\left[ 9; 66\right]$ &  $\left[ 11; 64\right]$ &  $\left[ 14; 61\right]$ &  $\left[ 17; 58\right]$ &  $\left[ 21; 54\right]$ \tabularnewline \hline
+3 &  22 &  $\left[ 7; 71\right]$ &  $\left[ 10; 68\right]$ &  $\left[ 12; 66\right]$ &  $\left[ 15; 63\right]$ &  $\left[ 18; 60\right]$ &  $\left[ 22; 56\right]$ \tabularnewline \hline
+3 &  23 &  $\left[ 7; 74\right]$ &  $\left[ 10; 71\right]$ &  $\left[ 12; 69\right]$ &  $\left[ 15; 66\right]$ &  $\left[ 19; 62\right]$ &  $\left[ 23; 58\right]$ \tabularnewline \hline
+3 &  24 &  $\left[ 7; 77\right]$ &  $\left[ 10; 74\right]$ &  $\left[ 12; 72\right]$ &  $\left[ 16; 68\right]$ &  $\left[ 19; 65\right]$ &  $\left[ 24; 60\right]$ \tabularnewline \hline
+3 &  25 &  $\left[ 7; 80\right]$ &  $\left[ 11; 76\right]$ &  $\left[ 13; 74\right]$ &  $\left[ 16; 71\right]$ &  $\left[ 20; 67\right]$ &  $\left[ 25; 62\right]$ \tabularnewline \hline
+4 &  4 &   &   &   &  $\left[ 10; 26\right]$ &  $\left[ 11; 25\right]$ &  $\left[ 13; 23\right]$ \tabularnewline \hline
+4 &  5 &   &   &  $\left[ 10; 30\right]$ &  $\left[ 11; 29\right]$ &  $\left[ 12; 28\right]$ &  $\left[ 14; 26\right]$ \tabularnewline \hline
+4 &  6 &   &  $\left[ 10; 34\right]$ &  $\left[ 11; 33\right]$ &  $\left[ 12; 32\right]$ &  $\left[ 13; 31\right]$ &  $\left[ 15; 29\right]$ \tabularnewline \hline
+4 &  7 &   &  $\left[ 10; 38\right]$ &  $\left[ 11; 37\right]$ &  $\left[ 13; 35\right]$ &  $\left[ 14; 34\right]$ &  $\left[ 16; 32\right]$ \tabularnewline \hline
+4 &  8 &   &  $\left[ 11; 41\right]$ &  $\left[ 12; 40\right]$ &  $\left[ 14; 38\right]$ &  $\left[ 15; 37\right]$ &  $\left[ 17; 35\right]$ \tabularnewline \hline
+4 &  9 &   &  $\left[ 11; 45\right]$ &  $\left[ 13; 43\right]$ &  $\left[ 14; 42\right]$ &  $\left[ 16; 40\right]$ &  $\left[ 19; 37\right]$ \tabularnewline \hline
+4 &  10 &  $\left[ 10; 50\right]$ &  $\left[ 12; 48\right]$ &  $\left[ 13; 47\right]$ &  $\left[ 15; 45\right]$ &  $\left[ 17; 43\right]$ &  $\left[ 20; 40\right]$ \tabularnewline \hline
+4 &  11 &  $\left[ 10; 54\right]$ &  $\left[ 12; 52\right]$ &  $\left[ 14; 50\right]$ &  $\left[ 16; 48\right]$ &  $\left[ 18; 46\right]$ &  $\left[ 21; 43\right]$ \tabularnewline \hline
+4 &  12 &  $\left[ 10; 58\right]$ &  $\left[ 13; 55\right]$ &  $\left[ 15; 53\right]$ &  $\left[ 17; 51\right]$ &  $\left[ 19; 49\right]$ &  $\left[ 22; 46\right]$ \tabularnewline \hline
+4 &  13 &  $\left[ 11; 61\right]$ &  $\left[ 13; 59\right]$ &  $\left[ 15; 57\right]$ &  $\left[ 18; 54\right]$ &  $\left[ 20; 52\right]$ &  $\left[ 23; 49\right]$ \tabularnewline \hline
+4 &  14 &  $\left[ 11; 65\right]$ &  $\left[ 14; 62\right]$ &  $\left[ 16; 60\right]$ &  $\left[ 19; 57\right]$ &  $\left[ 21; 55\right]$ &  $\left[ 25; 51\right]$ \tabularnewline \hline
+4 &  15 &  $\left[ 11; 69\right]$ &  $\left[ 15; 65\right]$ &  $\left[ 17; 63\right]$ &  $\left[ 20; 60\right]$ &  $\left[ 22; 58\right]$ &  $\left[ 26; 54\right]$ \tabularnewline \hline
+4 &  16 &  $\left[ 12; 72\right]$ &  $\left[ 15; 69\right]$ &  $\left[ 17; 67\right]$ &  $\left[ 21; 63\right]$ &  $\left[ 24; 60\right]$ &  $\left[ 27; 57\right]$ \tabularnewline \hline
+4 &  17 &  $\left[ 12; 76\right]$ &  $\left[ 16; 72\right]$ &  $\left[ 18; 70\right]$ &  $\left[ 21; 67\right]$ &  $\left[ 25; 63\right]$ &  $\left[ 28; 60\right]$ \tabularnewline \hline
+4 &  18 &  $\left[ 13; 79\right]$ &  $\left[ 16; 76\right]$ &  $\left[ 19; 73\right]$ &  $\left[ 22; 70\right]$ &  $\left[ 26; 66\right]$ &  $\left[ 30; 62\right]$ \tabularnewline \hline
+4 &  19 &  $\left[ 13; 83\right]$ &  $\left[ 17; 79\right]$ &  $\left[ 19; 77\right]$ &  $\left[ 23; 73\right]$ &  $\left[ 27; 69\right]$ &  $\left[ 31; 65\right]$ \tabularnewline \hline
+4 &  20 &  $\left[ 13; 87\right]$ &  $\left[ 18; 82\right]$ &  $\left[ 20; 80\right]$ &  $\left[ 24; 76\right]$ &  $\left[ 28; 72\right]$ &  $\left[ 32; 68\right]$ \tabularnewline \hline
+4 &  21 &  $\left[ 14; 90\right]$ &  $\left[ 18; 86\right]$ &  $\left[ 21; 83\right]$ &  $\left[ 25; 79\right]$ &  $\left[ 29; 75\right]$ &  $\left[ 33; 71\right]$ \tabularnewline \hline
+4 &  22 &  $\left[ 14; 94\right]$ &  $\left[ 19; 89\right]$ &  $\left[ 21; 87\right]$ &  $\left[ 26; 82\right]$ &  $\left[ 30; 78\right]$ &  $\left[ 35; 73\right]$ \tabularnewline \hline
+4 &  23 &  $\left[ 14; 98\right]$ &  $\left[ 19; 93\right]$ &  $\left[ 22; 90\right]$ &  $\left[ 27; 85\right]$ &  $\left[ 31; 81\right]$ &  $\left[ 36; 76\right]$ \tabularnewline \hline
+4 &  24 &  $\left[ 15; 101\right]$ &  $\left[ 20; 96\right]$ &  $\left[ 23; 93\right]$ &  $\left[ 27; 89\right]$ &  $\left[ 32; 84\right]$ &  $\left[ 38; 78\right]$ \tabularnewline \hline
+4 &  25 &  $\left[ 15; 105\right]$ &  $\left[ 20; 100\right]$ &  $\left[ 23; 97\right]$ &  $\left[ 28; 92\right]$ &  $\left[ 33; 87\right]$ &  $\left[ 38; 82\right]$ \tabularnewline \hline
+5 &  5 &   &  $\left[ 15; 40\right]$ &  $\left[ 16; 39\right]$ &  $\left[ 17; 38\right]$ &  $\left[ 19; 36\right]$ &  $\left[ 20; 35\right]$ \tabularnewline \hline
+5 &  6 &   &  $\left[ 16; 44\right]$ &  $\left[ 17; 43\right]$ &  $\left[ 18; 42\right]$ &  $\left[ 20; 40\right]$ &  $\left[ 22; 38\right]$ \tabularnewline \hline
+5 &  7 &   &  $\left[ 16; 49\right]$ &  $\left[ 18; 47\right]$ &  $\left[ 20; 45\right]$ &  $\left[ 21; 44\right]$ &  $\left[ 23; 42\right]$ \tabularnewline \hline
+5 &  8 &  $\left[ 15; 55\right]$ &  $\left[ 17; 53\right]$ &  $\left[ 19; 51\right]$ &  $\left[ 21; 49\right]$ &  $\left[ 23; 47\right]$ &  $\left[ 25; 45\right]$ \tabularnewline \hline
+5 &  9 &  $\left[ 16; 59\right]$ &  $\left[ 18; 57\right]$ &  $\left[ 20; 55\right]$ &  $\left[ 22; 53\right]$ &  $\left[ 24; 51\right]$ &  $\left[ 27; 48\right]$ \tabularnewline \hline
+5 &  10 &  $\left[ 16; 64\right]$ &  $\left[ 19; 61\right]$ &  $\left[ 21; 59\right]$ &  $\left[ 23; 57\right]$ &  $\left[ 26; 54\right]$ &  $\left[ 28; 52\right]$ \tabularnewline \hline
+5 &  11 &  $\left[ 17; 68\right]$ &  $\left[ 20; 65\right]$ &  $\left[ 22; 63\right]$ &  $\left[ 24; 61\right]$ &  $\left[ 27; 58\right]$ &  $\left[ 30; 55\right]$ \tabularnewline \hline
+5 &  12 &  $\left[ 17; 73\right]$ &  $\left[ 21; 69\right]$ &  $\left[ 23; 67\right]$ &  $\left[ 26; 64\right]$ &  $\left[ 28; 62\right]$ &  $\left[ 32; 58\right]$ \tabularnewline \hline
+5 &  13 &  $\left[ 18; 77\right]$ &  $\left[ 22; 73\right]$ &  $\left[ 24; 71\right]$ &  $\left[ 27; 68\right]$ &  $\left[ 30; 65\right]$ &  $\left[ 33; 62\right]$ \tabularnewline \hline
+5 &  14 &  $\left[ 18; 82\right]$ &  $\left[ 22; 78\right]$ &  $\left[ 25; 75\right]$ &  $\left[ 28; 72\right]$ &  $\left[ 31; 69\right]$ &  $\left[ 35; 65\right]$ \tabularnewline \hline
+5 &  15 &  $\left[ 19; 86\right]$ &  $\left[ 23; 82\right]$ &  $\left[ 26; 79\right]$ &  $\left[ 29; 76\right]$ &  $\left[ 33; 72\right]$ &  $\left[ 37; 68\right]$ \tabularnewline \hline
+5 &  16 &  $\left[ 20; 90\right]$ &  $\left[ 24; 86\right]$ &  $\left[ 27; 83\right]$ &  $\left[ 30; 80\right]$ &  $\left[ 34; 76\right]$ &  $\left[ 38; 72\right]$ \tabularnewline \hline
+5 &  17 &  $\left[ 20; 95\right]$ &  $\left[ 25; 90\right]$ &  $\left[ 28; 87\right]$ &  $\left[ 32; 83\right]$ &  $\left[ 35; 80\right]$ &  $\left[ 40; 75\right]$ \tabularnewline \hline
+5 &  18 &  $\left[ 21; 99\right]$ &  $\left[ 26; 94\right]$ &  $\left[ 29; 91\right]$ &  $\left[ 33; 87\right]$ &  $\left[ 37; 83\right]$ &  $\left[ 42; 78\right]$ \tabularnewline \hline
+5 &  19 &  $\left[ 22; 103\right]$ &  $\left[ 27; 98\right]$ &  $\left[ 30; 95\right]$ &  $\left[ 34; 91\right]$ &  $\left[ 38; 87\right]$ &  $\left[ 43; 82\right]$ \tabularnewline \hline
+5 &  20 &  $\left[ 22; 108\right]$ &  $\left[ 28; 102\right]$ &  $\left[ 31; 99\right]$ &  $\left[ 35; 95\right]$ &  $\left[ 40; 90\right]$ &  $\left[ 45; 85\right]$ \tabularnewline \hline
+5 &  21 &  $\left[ 23; 112\right]$ &  $\left[ 29; 106\right]$ &  $\left[ 32; 103\right]$ &  $\left[ 37; 98\right]$ &  $\left[ 41; 94\right]$ &  $\left[ 47; 88\right]$ \tabularnewline \hline
+5 &  22 &  $\left[ 23; 117\right]$ &  $\left[ 29; 111\right]$ &  $\left[ 33; 107\right]$ &  $\left[ 38; 102\right]$ &  $\left[ 43; 97\right]$ &  $\left[ 48; 92\right]$ \tabularnewline \hline
+5 &  23 &  $\left[ 24; 121\right]$ &  $\left[ 30; 115\right]$ &  $\left[ 34; 111\right]$ &  $\left[ 39; 106\right]$ &  $\left[ 44; 101\right]$ &  $\left[ 50; 95\right]$ \tabularnewline \hline
+5 &  24 &  $\left[ 25; 125\right]$ &  $\left[ 31; 119\right]$ &  $\left[ 35; 115\right]$ &  $\left[ 40; 110\right]$ &  $\left[ 45; 105\right]$ &  $\left[ 51; 99\right]$ \tabularnewline \hline
+5 &  25 &  $\left[ 25; 130\right]$ &  $\left[ 32; 123\right]$ &  $\left[ 36; 119\right]$ &  $\left[ 42; 113\right]$ &  $\left[ 47; 108\right]$ &  $\left[ 53; 102\right]$ \tabularnewline \hline
+6 &  6 &   &  $\left[ 23; 55\right]$ &  $\left[ 24; 54\right]$ &  $\left[ 26; 52\right]$ &  $\left[ 28; 50\right]$ &  $\left[ 30; 48\right]$ \tabularnewline \hline
+6 &  7 &  $\left[ 21; 63\right]$ &  $\left[ 24; 60\right]$ &  $\left[ 25; 59\right]$ &  $\left[ 27; 57\right]$ &  $\left[ 29; 55\right]$ &  $\left[ 32; 52\right]$ \tabularnewline \hline
+6 &  8 &  $\left[ 22; 68\right]$ &  $\left[ 25; 65\right]$ &  $\left[ 27; 63\right]$ &  $\left[ 29; 61\right]$ &  $\left[ 31; 59\right]$ &  $\left[ 34; 56\right]$ \tabularnewline \hline
+6 &  9 &  $\left[ 23; 73\right]$ &  $\left[ 26; 70\right]$ &  $\left[ 28; 68\right]$ &  $\left[ 31; 65\right]$ &  $\left[ 33; 63\right]$ &  $\left[ 36; 60\right]$ \tabularnewline \hline
+6 &  10 &  $\left[ 24; 78\right]$ &  $\left[ 27; 75\right]$ &  $\left[ 29; 73\right]$ &  $\left[ 32; 70\right]$ &  $\left[ 35; 67\right]$ &  $\left[ 38; 64\right]$ \tabularnewline \hline
+6 &  11 &  $\left[ 25; 83\right]$ &  $\left[ 28; 80\right]$ &  $\left[ 30; 78\right]$ &  $\left[ 34; 74\right]$ &  $\left[ 37; 71\right]$ &  $\left[ 40; 68\right]$ \tabularnewline \hline
+6 &  12 &  $\left[ 25; 89\right]$ &  $\left[ 30; 84\right]$ &  $\left[ 32; 82\right]$ &  $\left[ 35; 79\right]$ &  $\left[ 38; 76\right]$ &  $\left[ 42; 72\right]$ \tabularnewline \hline
+6 &  13 &  $\left[ 26; 94\right]$ &  $\left[ 31; 89\right]$ &  $\left[ 33; 87\right]$ &  $\left[ 37; 83\right]$ &  $\left[ 40; 80\right]$ &  $\left[ 44; 76\right]$ \tabularnewline \hline
+6 &  14 &  $\left[ 27; 99\right]$ &  $\left[ 32; 94\right]$ &  $\left[ 34; 92\right]$ &  $\left[ 38; 88\right]$ &  $\left[ 42; 84\right]$ &  $\left[ 46; 80\right]$ \tabularnewline \hline
+6 &  15 &  $\left[ 28; 104\right]$ &  $\left[ 33; 99\right]$ &  $\left[ 36; 96\right]$ &  $\left[ 40; 92\right]$ &  $\left[ 44; 88\right]$ &  $\left[ 48; 84\right]$ \tabularnewline \hline
+6 &  16 &  $\left[ 29; 109\right]$ &  $\left[ 34; 104\right]$ &  $\left[ 37; 101\right]$ &  $\left[ 42; 96\right]$ &  $\left[ 46; 92\right]$ &  $\left[ 50; 88\right]$ \tabularnewline \hline
+6 &  17 &  $\left[ 30; 114\right]$ &  $\left[ 36; 108\right]$ &  $\left[ 39; 105\right]$ &  $\left[ 43; 101\right]$ &  $\left[ 47; 97\right]$ &  $\left[ 52; 92\right]$ \tabularnewline \hline
+6 &  18 &  $\left[ 31; 119\right]$ &  $\left[ 37; 113\right]$ &  $\left[ 40; 110\right]$ &  $\left[ 45; 105\right]$ &  $\left[ 49; 101\right]$ &  $\left[ 55; 95\right]$ \tabularnewline \hline
+6 &  19 &  $\left[ 32; 124\right]$ &  $\left[ 38; 118\right]$ &  $\left[ 41; 115\right]$ &  $\left[ 46; 110\right]$ &  $\left[ 51; 105\right]$ &  $\left[ 57; 99\right]$ \tabularnewline \hline
+6 &  20 &  $\left[ 33; 129\right]$ &  $\left[ 39; 123\right]$ &  $\left[ 43; 119\right]$ &  $\left[ 48; 114\right]$ &  $\left[ 53; 109\right]$ &  $\left[ 59; 103\right]$ \tabularnewline \hline
+6 &  21 &  $\left[ 33; 135\right]$ &  $\left[ 40; 128\right]$ &  $\left[ 44; 124\right]$ &  $\left[ 50; 118\right]$ &  $\left[ 55; 113\right]$ &  $\left[ 61; 107\right]$ \tabularnewline \hline
+6 &  22 &  $\left[ 34; 140\right]$ &  $\left[ 42; 132\right]$ &  $\left[ 45; 129\right]$ &  $\left[ 51; 123\right]$ &  $\left[ 57; 117\right]$ &  $\left[ 63; 111\right]$ \tabularnewline \hline
+6 &  23 &  $\left[ 35; 145\right]$ &  $\left[ 43; 137\right]$ &  $\left[ 47; 133\right]$ &  $\left[ 53; 127\right]$ &  $\left[ 58; 122\right]$ &  $\left[ 65; 115\right]$ \tabularnewline \hline
+6 &  24 &  $\left[ 36; 150\right]$ &  $\left[ 44; 142\right]$ &  $\left[ 48; 138\right]$ &  $\left[ 54; 132\right]$ &  $\left[ 60; 126\right]$ &  $\left[ 67; 119\right]$ \tabularnewline \hline
+6 &  25 &  $\left[ 37; 155\right]$ &  $\left[ 45; 147\right]$ &  $\left[ 50; 142\right]$ &  $\left[ 56; 136\right]$ &  $\left[ 62; 130\right]$ &  $\left[ 69; 123\right]$ \tabularnewline \hline
+7 &  7 &  $\left[ 29; 76\right]$ &  $\left[ 32; 73\right]$ &  $\left[ 34; 71\right]$ &  $\left[ 36; 69\right]$ &  $\left[ 39; 66\right]$ &  $\left[ 41; 64\right]$ \tabularnewline \hline
+7 &  8 &  $\left[ 30; 82\right]$ &  $\left[ 34; 78\right]$ &  $\left[ 35; 77\right]$ &  $\left[ 38; 74\right]$ &  $\left[ 41; 71\right]$ &  $\left[ 44; 68\right]$ \tabularnewline \hline
+7 &  9 &  $\left[ 31; 88\right]$ &  $\left[ 35; 84\right]$ &  $\left[ 37; 82\right]$ &  $\left[ 40; 79\right]$ &  $\left[ 43; 76\right]$ &  $\left[ 46; 73\right]$ \tabularnewline \hline
+7 &  10 &  $\left[ 33; 93\right]$ &  $\left[ 37; 89\right]$ &  $\left[ 39; 87\right]$ &  $\left[ 42; 84\right]$ &  $\left[ 45; 81\right]$ &  $\left[ 49; 77\right]$ \tabularnewline \hline
+7 &  11 &  $\left[ 34; 99\right]$ &  $\left[ 38; 95\right]$ &  $\left[ 40; 93\right]$ &  $\left[ 44; 89\right]$ &  $\left[ 47; 86\right]$ &  $\left[ 51; 82\right]$ \tabularnewline \hline
+7 &  12 &  $\left[ 35; 105\right]$ &  $\left[ 40; 100\right]$ &  $\left[ 42; 98\right]$ &  $\left[ 46; 94\right]$ &  $\left[ 49; 91\right]$ &  $\left[ 54; 86\right]$ \tabularnewline \hline
+7 &  13 &  $\left[ 36; 111\right]$ &  $\left[ 41; 106\right]$ &  $\left[ 44; 103\right]$ &  $\left[ 48; 99\right]$ &  $\left[ 52; 95\right]$ &  $\left[ 56; 91\right]$ \tabularnewline \hline
+7 &  14 &  $\left[ 37; 117\right]$ &  $\left[ 43; 111\right]$ &  $\left[ 45; 109\right]$ &  $\left[ 50; 104\right]$ &  $\left[ 54; 100\right]$ &  $\left[ 59; 95\right]$ \tabularnewline \hline
+7 &  15 &  $\left[ 38; 123\right]$ &  $\left[ 44; 117\right]$ &  $\left[ 47; 114\right]$ &  $\left[ 52; 109\right]$ &  $\left[ 56; 105\right]$ &  $\left[ 61; 100\right]$ \tabularnewline \hline
+7 &  16 &  $\left[ 39; 129\right]$ &  $\left[ 46; 122\right]$ &  $\left[ 49; 119\right]$ &  $\left[ 54; 114\right]$ &  $\left[ 58; 110\right]$ &  $\left[ 64; 104\right]$ \tabularnewline \hline
+7 &  17 &  $\left[ 41; 134\right]$ &  $\left[ 47; 128\right]$ &  $\left[ 51; 124\right]$ &  $\left[ 56; 119\right]$ &  $\left[ 61; 114\right]$ &  $\left[ 66; 109\right]$ \tabularnewline \hline
+7 &  18 &  $\left[ 42; 140\right]$ &  $\left[ 49; 133\right]$ &  $\left[ 52; 130\right]$ &  $\left[ 58; 124\right]$ &  $\left[ 63; 119\right]$ &  $\left[ 69; 113\right]$ \tabularnewline \hline
+7 &  19 &  $\left[ 43; 146\right]$ &  $\left[ 50; 139\right]$ &  $\left[ 54; 135\right]$ &  $\left[ 60; 129\right]$ &  $\left[ 65; 124\right]$ &  $\left[ 71; 118\right]$ \tabularnewline \hline
+7 &  20 &  $\left[ 44; 152\right]$ &  $\left[ 52; 144\right]$ &  $\left[ 56; 140\right]$ &  $\left[ 62; 134\right]$ &  $\left[ 67; 129\right]$ &  $\left[ 74; 122\right]$ \tabularnewline \hline
+7 &  21 &  $\left[ 46; 157\right]$ &  $\left[ 53; 150\right]$ &  $\left[ 58; 145\right]$ &  $\left[ 64; 139\right]$ &  $\left[ 69; 134\right]$ &  $\left[ 76; 127\right]$ \tabularnewline \hline
+7 &  22 &  $\left[ 47; 163\right]$ &  $\left[ 55; 155\right]$ &  $\left[ 59; 151\right]$ &  $\left[ 66; 144\right]$ &  $\left[ 72; 138\right]$ &  $\left[ 79; 131\right]$ \tabularnewline \hline
+7 &  23 &  $\left[ 48; 169\right]$ &  $\left[ 57; 160\right]$ &  $\left[ 61; 156\right]$ &  $\left[ 68; 149\right]$ &  $\left[ 74; 143\right]$ &  $\left[ 81; 136\right]$ \tabularnewline \hline
+7 &  24 &  $\left[ 49; 175\right]$ &  $\left[ 58; 166\right]$ &  $\left[ 63; 161\right]$ &  $\left[ 70; 154\right]$ &  $\left[ 76; 148\right]$ &  $\left[ 84; 140\right]$ \tabularnewline \hline
+7 &  25 &  $\left[ 50; 181\right]$ &  $\left[ 60; 171\right]$ &  $\left[ 64; 167\right]$ &  $\left[ 72; 159\right]$ &  $\left[ 78; 153\right]$ &  $\left[ 86; 145\right]$ \tabularnewline \hline
+8 &  8 &  $\left[ 40; 96\right]$ &  $\left[ 43; 93\right]$ &  $\left[ 45; 91\right]$ &  $\left[ 49; 87\right]$ &  $\left[ 51; 85\right]$ &  $\left[ 55; 81\right]$ \tabularnewline \hline
+8 &  9 &  $\left[ 41; 103\right]$ &  $\left[ 45; 99\right]$ &  $\left[ 47; 97\right]$ &  $\left[ 51; 93\right]$ &  $\left[ 54; 90\right]$ &  $\left[ 58; 86\right]$ \tabularnewline \hline
+8 &  10 &  $\left[ 42; 110\right]$ &  $\left[ 47; 105\right]$ &  $\left[ 49; 103\right]$ &  $\left[ 53; 99\right]$ &  $\left[ 56; 96\right]$ &  $\left[ 60; 92\right]$ \tabularnewline \hline
+8 &  11 &  $\left[ 44; 116\right]$ &  $\left[ 49; 111\right]$ &  $\left[ 51; 109\right]$ &  $\left[ 55; 105\right]$ &  $\left[ 59; 101\right]$ &  $\left[ 63; 97\right]$ \tabularnewline \hline
+8 &  12 &  $\left[ 45; 123\right]$ &  $\left[ 51; 117\right]$ &  $\left[ 53; 115\right]$ &  $\left[ 58; 110\right]$ &  $\left[ 62; 106\right]$ &  $\left[ 66; 102\right]$ \tabularnewline \hline
+8 &  13 &  $\left[ 47; 129\right]$ &  $\left[ 53; 123\right]$ &  $\left[ 56; 120\right]$ &  $\left[ 60; 116\right]$ &  $\left[ 64; 112\right]$ &  $\left[ 69; 107\right]$ \tabularnewline \hline
+8 &  14 &  $\left[ 48; 136\right]$ &  $\left[ 54; 130\right]$ &  $\left[ 58; 126\right]$ &  $\left[ 62; 122\right]$ &  $\left[ 67; 117\right]$ &  $\left[ 72; 112\right]$ \tabularnewline \hline
+8 &  15 &  $\left[ 50; 142\right]$ &  $\left[ 56; 136\right]$ &  $\left[ 60; 132\right]$ &  $\left[ 65; 127\right]$ &  $\left[ 69; 123\right]$ &  $\left[ 75; 117\right]$ \tabularnewline \hline
+8 &  16 &  $\left[ 51; 149\right]$ &  $\left[ 58; 142\right]$ &  $\left[ 62; 138\right]$ &  $\left[ 67; 133\right]$ &  $\left[ 72; 128\right]$ &  $\left[ 78; 122\right]$ \tabularnewline \hline
+8 &  17 &  $\left[ 53; 155\right]$ &  $\left[ 60; 148\right]$ &  $\left[ 64; 144\right]$ &  $\left[ 70; 138\right]$ &  $\left[ 75; 133\right]$ &  $\left[ 81; 127\right]$ \tabularnewline \hline
+8 &  18 &  $\left[ 54; 162\right]$ &  $\left[ 62; 154\right]$ &  $\left[ 66; 150\right]$ &  $\left[ 72; 144\right]$ &  $\left[ 77; 139\right]$ &  $\left[ 84; 132\right]$ \tabularnewline \hline
+8 &  19 &  $\left[ 56; 168\right]$ &  $\left[ 64; 160\right]$ &  $\left[ 68; 156\right]$ &  $\left[ 74; 150\right]$ &  $\left[ 80; 144\right]$ &  $\left[ 87; 137\right]$ \tabularnewline \hline
+8 &  20 &  $\left[ 57; 175\right]$ &  $\left[ 66; 166\right]$ &  $\left[ 70; 162\right]$ &  $\left[ 77; 155\right]$ &  $\left[ 83; 149\right]$ &  $\left[ 90; 142\right]$ \tabularnewline \hline
+8 &  21 &  $\left[ 59; 181\right]$ &  $\left[ 68; 172\right]$ &  $\left[ 72; 168\right]$ &  $\left[ 79; 161\right]$ &  $\left[ 85; 155\right]$ &  $\left[ 92; 148\right]$ \tabularnewline \hline
+8 &  22 &  $\left[ 60; 188\right]$ &  $\left[ 70; 178\right]$ &  $\left[ 74; 174\right]$ &  $\left[ 81; 167\right]$ &  $\left[ 88; 160\right]$ &  $\left[ 95; 153\right]$ \tabularnewline \hline
+8 &  23 &  $\left[ 62; 194\right]$ &  $\left[ 71; 185\right]$ &  $\left[ 76; 180\right]$ &  $\left[ 84; 172\right]$ &  $\left[ 90; 166\right]$ &  $\left[ 98; 158\right]$ \tabularnewline \hline
+8 &  24 &  $\left[ 64; 200\right]$ &  $\left[ 73; 191\right]$ &  $\left[ 78; 186\right]$ &  $\left[ 86; 178\right]$ &  $\left[ 93; 171\right]$ &  $\left[ 101; 163\right]$ \tabularnewline \hline
+8 &  25 &  $\left[ 65; 207\right]$ &  $\left[ 75; 197\right]$ &  $\left[ 81; 191\right]$ &  $\left[ 89; 183\right]$ &  $\left[ 96; 176\right]$ &  $\left[ 104; 168\right]$ \tabularnewline \hline
+9 &  9 &  $\left[ 52; 119\right]$ &  $\left[ 56; 115\right]$ &  $\left[ 59; 112\right]$ &  $\left[ 62; 109\right]$ &  $\left[ 66; 105\right]$ &  $\left[ 70; 101\right]$ \tabularnewline \hline
+9 &  10 &  $\left[ 53; 127\right]$ &  $\left[ 58; 122\right]$ &  $\left[ 61; 119\right]$ &  $\left[ 65; 115\right]$ &  $\left[ 69; 111\right]$ &  $\left[ 73; 107\right]$ \tabularnewline \hline
+9 &  11 &  $\left[ 55; 134\right]$ &  $\left[ 61; 128\right]$ &  $\left[ 63; 126\right]$ &  $\left[ 68; 121\right]$ &  $\left[ 72; 117\right]$ &  $\left[ 76; 113\right]$ \tabularnewline \hline
+9 &  12 &  $\left[ 57; 141\right]$ &  $\left[ 63; 135\right]$ &  $\left[ 66; 132\right]$ &  $\left[ 71; 127\right]$ &  $\left[ 75; 123\right]$ &  $\left[ 80; 118\right]$ \tabularnewline \hline
+9 &  13 &  $\left[ 59; 148\right]$ &  $\left[ 65; 142\right]$ &  $\left[ 68; 139\right]$ &  $\left[ 73; 134\right]$ &  $\left[ 78; 129\right]$ &  $\left[ 83; 124\right]$ \tabularnewline \hline
+9 &  14 &  $\left[ 60; 156\right]$ &  $\left[ 67; 149\right]$ &  $\left[ 71; 145\right]$ &  $\left[ 76; 140\right]$ &  $\left[ 81; 135\right]$ &  $\left[ 86; 130\right]$ \tabularnewline \hline
+9 &  15 &  $\left[ 62; 163\right]$ &  $\left[ 69; 156\right]$ &  $\left[ 73; 152\right]$ &  $\left[ 79; 146\right]$ &  $\left[ 84; 141\right]$ &  $\left[ 90; 135\right]$ \tabularnewline \hline
+9 &  16 &  $\left[ 64; 170\right]$ &  $\left[ 72; 162\right]$ &  $\left[ 76; 158\right]$ &  $\left[ 82; 152\right]$ &  $\left[ 87; 147\right]$ &  $\left[ 93; 141\right]$ \tabularnewline \hline
+9 &  17 &  $\left[ 66; 177\right]$ &  $\left[ 74; 169\right]$ &  $\left[ 78; 165\right]$ &  $\left[ 84; 159\right]$ &  $\left[ 90; 153\right]$ &  $\left[ 97; 146\right]$ \tabularnewline \hline
+9 &  18 &  $\left[ 68; 184\right]$ &  $\left[ 76; 176\right]$ &  $\left[ 81; 171\right]$ &  $\left[ 87; 165\right]$ &  $\left[ 93; 159\right]$ &  $\left[ 100; 152\right]$ \tabularnewline \hline
+9 &  19 &  $\left[ 70; 191\right]$ &  $\left[ 78; 183\right]$ &  $\left[ 83; 178\right]$ &  $\left[ 90; 171\right]$ &  $\left[ 96; 165\right]$ &  $\left[ 103; 158\right]$ \tabularnewline \hline
+9 &  20 &  $\left[ 71; 199\right]$ &  $\left[ 81; 189\right]$ &  $\left[ 85; 185\right]$ &  $\left[ 93; 177\right]$ &  $\left[ 99; 171\right]$ &  $\left[ 107; 163\right]$ \tabularnewline \hline
+9 &  21 &  $\left[ 73; 206\right]$ &  $\left[ 83; 196\right]$ &  $\left[ 88; 191\right]$ &  $\left[ 95; 184\right]$ &  $\left[ 102; 177\right]$ &  $\left[ 110; 169\right]$ \tabularnewline \hline
+9 &  22 &  $\left[ 75; 213\right]$ &  $\left[ 85; 203\right]$ &  $\left[ 90; 198\right]$ &  $\left[ 98; 190\right]$ &  $\left[ 105; 183\right]$ &  $\left[ 113; 175\right]$ \tabularnewline \hline
+9 &  23 &  $\left[ 77; 220\right]$ &  $\left[ 88; 209\right]$ &  $\left[ 93; 204\right]$ &  $\left[ 101; 196\right]$ &  $\left[ 108; 189\right]$ &  $\left[ 117; 180\right]$ \tabularnewline \hline
+9 &  24 &  $\left[ 79; 227\right]$ &  $\left[ 90; 216\right]$ &  $\left[ 95; 211\right]$ &  $\left[ 104; 202\right]$ &  $\left[ 111; 195\right]$ &  $\left[ 120; 186\right]$ \tabularnewline \hline
+9 &  25 &  $\left[ 81; 234\right]$ &  $\left[ 92; 223\right]$ &  $\left[ 98; 217\right]$ &  $\left[ 107; 208\right]$ &  $\left[ 114; 201\right]$ &  $\left[ 123; 192\right]$ \tabularnewline \hline
+10 &  10 &  $\left[ 65; 145\right]$ &  $\left[ 71; 139\right]$ &  $\left[ 74; 136\right]$ &  $\left[ 78; 132\right]$ &  $\left[ 82; 128\right]$ &  $\left[ 87; 123\right]$ \tabularnewline \hline
+10 &  11 &  $\left[ 67; 153\right]$ &  $\left[ 73; 147\right]$ &  $\left[ 77; 143\right]$ &  $\left[ 81; 139\right]$ &  $\left[ 86; 134\right]$ &  $\left[ 91; 129\right]$ \tabularnewline \hline
+10 &  12 &  $\left[ 69; 161\right]$ &  $\left[ 76; 154\right]$ &  $\left[ 79; 151\right]$ &  $\left[ 84; 146\right]$ &  $\left[ 89; 141\right]$ &  $\left[ 94; 136\right]$ \tabularnewline \hline
+10 &  13 &  $\left[ 72; 168\right]$ &  $\left[ 79; 161\right]$ &  $\left[ 82; 158\right]$ &  $\left[ 88; 152\right]$ &  $\left[ 92; 148\right]$ &  $\left[ 98; 142\right]$ \tabularnewline \hline
+10 &  14 &  $\left[ 74; 176\right]$ &  $\left[ 81; 169\right]$ &  $\left[ 85; 165\right]$ &  $\left[ 91; 159\right]$ &  $\left[ 96; 154\right]$ &  $\left[ 102; 148\right]$ \tabularnewline \hline
+10 &  15 &  $\left[ 76; 184\right]$ &  $\left[ 84; 176\right]$ &  $\left[ 88; 172\right]$ &  $\left[ 94; 166\right]$ &  $\left[ 99; 161\right]$ &  $\left[ 106; 154\right]$ \tabularnewline \hline
+10 &  16 &  $\left[ 78; 192\right]$ &  $\left[ 86; 184\right]$ &  $\left[ 91; 179\right]$ &  $\left[ 97; 173\right]$ &  $\left[ 103; 167\right]$ &  $\left[ 109; 161\right]$ \tabularnewline \hline
+10 &  17 &  $\left[ 80; 200\right]$ &  $\left[ 89; 191\right]$ &  $\left[ 93; 187\right]$ &  $\left[ 100; 180\right]$ &  $\left[ 106; 174\right]$ &  $\left[ 113; 167\right]$ \tabularnewline \hline
+10 &  18 &  $\left[ 82; 208\right]$ &  $\left[ 92; 198\right]$ &  $\left[ 96; 194\right]$ &  $\left[ 103; 187\right]$ &  $\left[ 110; 180\right]$ &  $\left[ 117; 173\right]$ \tabularnewline \hline
+10 &  19 &  $\left[ 84; 216\right]$ &  $\left[ 94; 206\right]$ &  $\left[ 99; 201\right]$ &  $\left[ 107; 193\right]$ &  $\left[ 113; 187\right]$ &  $\left[ 121; 179\right]$ \tabularnewline \hline
+10 &  20 &  $\left[ 87; 223\right]$ &  $\left[ 97; 213\right]$ &  $\left[ 102; 208\right]$ &  $\left[ 110; 200\right]$ &  $\left[ 117; 193\right]$ &  $\left[ 125; 185\right]$ \tabularnewline \hline
+10 &  21 &  $\left[ 89; 231\right]$ &  $\left[ 99; 221\right]$ &  $\left[ 105; 215\right]$ &  $\left[ 113; 207\right]$ &  $\left[ 120; 200\right]$ &  $\left[ 128; 192\right]$ \tabularnewline \hline
+10 &  22 &  $\left[ 91; 239\right]$ &  $\left[ 102; 228\right]$ &  $\left[ 108; 222\right]$ &  $\left[ 116; 214\right]$ &  $\left[ 123; 207\right]$ &  $\left[ 132; 198\right]$ \tabularnewline \hline
+10 &  23 &  $\left[ 93; 247\right]$ &  $\left[ 105; 235\right]$ &  $\left[ 110; 230\right]$ &  $\left[ 119; 221\right]$ &  $\left[ 127; 213\right]$ &  $\left[ 136; 204\right]$ \tabularnewline \hline
+10 &  24 &  $\left[ 95; 255\right]$ &  $\left[ 107; 243\right]$ &  $\left[ 113; 237\right]$ &  $\left[ 122; 228\right]$ &  $\left[ 130; 220\right]$ &  $\left[ 140; 210\right]$ \tabularnewline \hline
+10 &  25 &  $\left[ 98; 262\right]$ &  $\left[ 110; 250\right]$ &  $\left[ 116; 244\right]$ &  $\left[ 126; 234\right]$ &  $\left[ 134; 226\right]$ &  $\left[ 144; 216\right]$ \tabularnewline \hline
+11 &  11 &  $\left[ 81; 172\right]$ &  $\left[ 87; 166\right]$ &  $\left[ 91; 162\right]$ &  $\left[ 96; 157\right]$ &  $\left[ 100; 153\right]$ &  $\left[ 106; 147\right]$ \tabularnewline \hline
+11 &  12 &  $\left[ 83; 181\right]$ &  $\left[ 90; 174\right]$ &  $\left[ 94; 170\right]$ &  $\left[ 99; 165\right]$ &  $\left[ 104; 160\right]$ &  $\left[ 110; 154\right]$ \tabularnewline \hline
+11 &  13 &  $\left[ 86; 189\right]$ &  $\left[ 93; 182\right]$ &  $\left[ 97; 178\right]$ &  $\left[ 103; 172\right]$ &  $\left[ 108; 167\right]$ &  $\left[ 114; 161\right]$ \tabularnewline \hline
+11 &  14 &  $\left[ 88; 198\right]$ &  $\left[ 96; 190\right]$ &  $\left[ 100; 186\right]$ &  $\left[ 106; 180\right]$ &  $\left[ 112; 174\right]$ &  $\left[ 118; 168\right]$ \tabularnewline \hline
+11 &  15 &  $\left[ 90; 207\right]$ &  $\left[ 99; 198\right]$ &  $\left[ 103; 194\right]$ &  $\left[ 110; 187\right]$ &  $\left[ 116; 181\right]$ &  $\left[ 123; 174\right]$ \tabularnewline \hline
+11 &  16 &  $\left[ 93; 215\right]$ &  $\left[ 102; 206\right]$ &  $\left[ 107; 201\right]$ &  $\left[ 113; 195\right]$ &  $\left[ 120; 188\right]$ &  $\left[ 127; 181\right]$ \tabularnewline \hline
+11 &  17 &  $\left[ 95; 224\right]$ &  $\left[ 105; 214\right]$ &  $\left[ 110; 209\right]$ &  $\left[ 117; 202\right]$ &  $\left[ 123; 196\right]$ &  $\left[ 131; 188\right]$ \tabularnewline \hline
+11 &  18 &  $\left[ 98; 232\right]$ &  $\left[ 108; 222\right]$ &  $\left[ 113; 217\right]$ &  $\left[ 121; 209\right]$ &  $\left[ 127; 203\right]$ &  $\left[ 135; 195\right]$ \tabularnewline \hline
+11 &  19 &  $\left[ 100; 241\right]$ &  $\left[ 111; 230\right]$ &  $\left[ 116; 225\right]$ &  $\left[ 124; 217\right]$ &  $\left[ 131; 210\right]$ &  $\left[ 139; 202\right]$ \tabularnewline \hline
+11 &  20 &  $\left[ 103; 249\right]$ &  $\left[ 114; 238\right]$ &  $\left[ 119; 233\right]$ &  $\left[ 128; 224\right]$ &  $\left[ 135; 217\right]$ &  $\left[ 144; 208\right]$ \tabularnewline \hline
+11 &  21 &  $\left[ 106; 257\right]$ &  $\left[ 117; 246\right]$ &  $\left[ 123; 240\right]$ &  $\left[ 131; 232\right]$ &  $\left[ 139; 224\right]$ &  $\left[ 148; 215\right]$ \tabularnewline \hline
+11 &  22 &  $\left[ 108; 266\right]$ &  $\left[ 120; 254\right]$ &  $\left[ 126; 248\right]$ &  $\left[ 135; 239\right]$ &  $\left[ 143; 231\right]$ &  $\left[ 152; 222\right]$ \tabularnewline \hline
+11 &  23 &  $\left[ 111; 274\right]$ &  $\left[ 123; 262\right]$ &  $\left[ 129; 256\right]$ &  $\left[ 139; 246\right]$ &  $\left[ 147; 238\right]$ &  $\left[ 156; 229\right]$ \tabularnewline \hline
+11 &  24 &  $\left[ 113; 283\right]$ &  $\left[ 126; 270\right]$ &  $\left[ 132; 264\right]$ &  $\left[ 142; 254\right]$ &  $\left[ 151; 245\right]$ &  $\left[ 161; 235\right]$ \tabularnewline \hline
+11 &  25 &  $\left[ 116; 291\right]$ &  $\left[ 129; 278\right]$ &  $\left[ 136; 271\right]$ &  $\left[ 146; 261\right]$ &  $\left[ 155; 252\right]$ &  $\left[ 165; 242\right]$ \tabularnewline \hline
+12 &  12 &  $\left[ 98; 202\right]$ &  $\left[ 105; 195\right]$ &  $\left[ 109; 191\right]$ &  $\left[ 115; 185\right]$ &  $\left[ 120; 180\right]$ &  $\left[ 127; 173\right]$ \tabularnewline \hline
+12 &  13 &  $\left[ 101; 211\right]$ &  $\left[ 109; 203\right]$ &  $\left[ 113; 199\right]$ &  $\left[ 119; 193\right]$ &  $\left[ 125; 187\right]$ &  $\left[ 131; 181\right]$ \tabularnewline \hline
+12 &  14 &  $\left[ 103; 221\right]$ &  $\left[ 112; 212\right]$ &  $\left[ 116; 208\right]$ &  $\left[ 123; 201\right]$ &  $\left[ 129; 195\right]$ &  $\left[ 136; 188\right]$ \tabularnewline \hline
+12 &  15 &  $\left[ 106; 230\right]$ &  $\left[ 115; 221\right]$ &  $\left[ 120; 216\right]$ &  $\left[ 127; 209\right]$ &  $\left[ 133; 203\right]$ &  $\left[ 141; 195\right]$ \tabularnewline \hline
+12 &  16 &  $\left[ 109; 239\right]$ &  $\left[ 119; 229\right]$ &  $\left[ 124; 224\right]$ &  $\left[ 131; 217\right]$ &  $\left[ 138; 210\right]$ &  $\left[ 145; 203\right]$ \tabularnewline \hline
+12 &  17 &  $\left[ 112; 248\right]$ &  $\left[ 122; 238\right]$ &  $\left[ 127; 233\right]$ &  $\left[ 135; 225\right]$ &  $\left[ 142; 218\right]$ &  $\left[ 150; 210\right]$ \tabularnewline \hline
+12 &  18 &  $\left[ 115; 257\right]$ &  $\left[ 125; 247\right]$ &  $\left[ 131; 241\right]$ &  $\left[ 139; 233\right]$ &  $\left[ 146; 226\right]$ &  $\left[ 155; 217\right]$ \tabularnewline \hline
+12 &  19 &  $\left[ 118; 266\right]$ &  $\left[ 129; 255\right]$ &  $\left[ 134; 250\right]$ &  $\left[ 143; 241\right]$ &  $\left[ 150; 234\right]$ &  $\left[ 159; 225\right]$ \tabularnewline \hline
+12 &  20 &  $\left[ 120; 276\right]$ &  $\left[ 132; 264\right]$ &  $\left[ 138; 258\right]$ &  $\left[ 147; 249\right]$ &  $\left[ 155; 241\right]$ &  $\left[ 164; 232\right]$ \tabularnewline \hline
+12 &  21 &  $\left[ 123; 285\right]$ &  $\left[ 136; 272\right]$ &  $\left[ 142; 266\right]$ &  $\left[ 151; 257\right]$ &  $\left[ 159; 249\right]$ &  $\left[ 169; 239\right]$ \tabularnewline \hline
+12 &  22 &  $\left[ 126; 294\right]$ &  $\left[ 139; 281\right]$ &  $\left[ 145; 275\right]$ &  $\left[ 155; 265\right]$ &  $\left[ 163; 257\right]$ &  $\left[ 173; 247\right]$ \tabularnewline \hline
+12 &  23 &  $\left[ 129; 303\right]$ &  $\left[ 142; 290\right]$ &  $\left[ 149; 283\right]$ &  $\left[ 159; 273\right]$ &  $\left[ 168; 264\right]$ &  $\left[ 178; 254\right]$ \tabularnewline \hline
+12 &  24 &  $\left[ 132; 312\right]$ &  $\left[ 146; 298\right]$ &  $\left[ 153; 291\right]$ &  $\left[ 163; 281\right]$ &  $\left[ 172; 272\right]$ &  $\left[ 183; 261\right]$ \tabularnewline \hline
+12 &  25 &  $\left[ 135; 321\right]$ &  $\left[ 149; 307\right]$ &  $\left[ 156; 300\right]$ &  $\left[ 167; 289\right]$ &  $\left[ 176; 280\right]$ &  $\left[ 187; 269\right]$ \tabularnewline \hline
+13 &  13 &  $\left[ 117; 234\right]$ &  $\left[ 125; 226\right]$ &  $\left[ 130; 221\right]$ &  $\left[ 136; 215\right]$ &  $\left[ 142; 209\right]$ &  $\left[ 149; 202\right]$ \tabularnewline \hline
+13 &  14 &  $\left[ 120; 244\right]$ &  $\left[ 129; 235\right]$ &  $\left[ 134; 230\right]$ &  $\left[ 141; 223\right]$ &  $\left[ 147; 217\right]$ &  $\left[ 154; 210\right]$ \tabularnewline \hline
+13 &  15 &  $\left[ 123; 254\right]$ &  $\left[ 133; 244\right]$ &  $\left[ 138; 239\right]$ &  $\left[ 145; 232\right]$ &  $\left[ 152; 225\right]$ &  $\left[ 159; 218\right]$ \tabularnewline \hline
+13 &  16 &  $\left[ 126; 264\right]$ &  $\left[ 136; 254\right]$ &  $\left[ 142; 248\right]$ &  $\left[ 150; 240\right]$ &  $\left[ 156; 234\right]$ &  $\left[ 165; 225\right]$ \tabularnewline \hline
+13 &  17 &  $\left[ 129; 274\right]$ &  $\left[ 140; 263\right]$ &  $\left[ 146; 257\right]$ &  $\left[ 154; 249\right]$ &  $\left[ 161; 242\right]$ &  $\left[ 170; 233\right]$ \tabularnewline \hline
+13 &  18 &  $\left[ 133; 283\right]$ &  $\left[ 144; 272\right]$ &  $\left[ 150; 266\right]$ &  $\left[ 158; 258\right]$ &  $\left[ 166; 250\right]$ &  $\left[ 175; 241\right]$ \tabularnewline \hline
+13 &  19 &  $\left[ 136; 293\right]$ &  $\left[ 148; 281\right]$ &  $\left[ 154; 275\right]$ &  $\left[ 163; 266\right]$ &  $\left[ 171; 258\right]$ &  $\left[ 180; 249\right]$ \tabularnewline \hline
+13 &  20 &  $\left[ 139; 303\right]$ &  $\left[ 151; 291\right]$ &  $\left[ 158; 284\right]$ &  $\left[ 167; 275\right]$ &  $\left[ 175; 267\right]$ &  $\left[ 185; 257\right]$ \tabularnewline \hline
+13 &  21 &  $\left[ 142; 313\right]$ &  $\left[ 155; 300\right]$ &  $\left[ 162; 293\right]$ &  $\left[ 171; 284\right]$ &  $\left[ 180; 275\right]$ &  $\left[ 190; 265\right]$ \tabularnewline \hline
+13 &  22 &  $\left[ 145; 323\right]$ &  $\left[ 159; 309\right]$ &  $\left[ 166; 302\right]$ &  $\left[ 176; 292\right]$ &  $\left[ 185; 283\right]$ &  $\left[ 195; 273\right]$ \tabularnewline \hline
+13 &  23 &  $\left[ 149; 332\right]$ &  $\left[ 163; 318\right]$ &  $\left[ 170; 311\right]$ &  $\left[ 180; 301\right]$ &  $\left[ 189; 292\right]$ &  $\left[ 200; 281\right]$ \tabularnewline \hline
+13 &  24 &  $\left[ 152; 342\right]$ &  $\left[ 166; 328\right]$ &  $\left[ 174; 320\right]$ &  $\left[ 185; 309\right]$ &  $\left[ 194; 300\right]$ &  $\left[ 205; 289\right]$ \tabularnewline \hline
+13 &  25 &  $\left[ 155; 352\right]$ &  $\left[ 170; 337\right]$ &  $\left[ 178; 329\right]$ &  $\left[ 189; 318\right]$ &  $\left[ 199; 308\right]$ &  $\left[ 211; 296\right]$ \tabularnewline \hline
+14 &  14 &  $\left[ 137; 269\right]$ &  $\left[ 147; 259\right]$ &  $\left[ 152; 254\right]$ &  $\left[ 160; 246\right]$ &  $\left[ 166; 240\right]$ &  $\left[ 174; 232\right]$ \tabularnewline \hline
+14 &  15 &  $\left[ 141; 279\right]$ &  $\left[ 151; 269\right]$ &  $\left[ 156; 264\right]$ &  $\left[ 164; 256\right]$ &  $\left[ 171; 249\right]$ &  $\left[ 179; 241\right]$ \tabularnewline \hline
+14 &  16 &  $\left[ 144; 290\right]$ &  $\left[ 155; 279\right]$ &  $\left[ 161; 273\right]$ &  $\left[ 169; 265\right]$ &  $\left[ 176; 258\right]$ &  $\left[ 185; 249\right]$ \tabularnewline \hline
+14 &  17 &  $\left[ 148; 300\right]$ &  $\left[ 159; 289\right]$ &  $\left[ 165; 283\right]$ &  $\left[ 174; 274\right]$ &  $\left[ 182; 266\right]$ &  $\left[ 190; 258\right]$ \tabularnewline \hline
+14 &  18 &  $\left[ 151; 311\right]$ &  $\left[ 163; 299\right]$ &  $\left[ 170; 292\right]$ &  $\left[ 179; 283\right]$ &  $\left[ 187; 275\right]$ &  $\left[ 196; 266\right]$ \tabularnewline \hline
+14 &  19 &  $\left[ 155; 321\right]$ &  $\left[ 168; 308\right]$ &  $\left[ 174; 302\right]$ &  $\left[ 183; 293\right]$ &  $\left[ 192; 284\right]$ &  $\left[ 202; 274\right]$ \tabularnewline \hline
+14 &  20 &  $\left[ 159; 331\right]$ &  $\left[ 172; 318\right]$ &  $\left[ 178; 312\right]$ &  $\left[ 188; 302\right]$ &  $\left[ 197; 293\right]$ &  $\left[ 207; 283\right]$ \tabularnewline \hline
+14 &  21 &  $\left[ 162; 342\right]$ &  $\left[ 176; 328\right]$ &  $\left[ 183; 321\right]$ &  $\left[ 193; 311\right]$ &  $\left[ 202; 302\right]$ &  $\left[ 213; 291\right]$ \tabularnewline \hline
+14 &  22 &  $\left[ 166; 352\right]$ &  $\left[ 180; 338\right]$ &  $\left[ 187; 331\right]$ &  $\left[ 198; 320\right]$ &  $\left[ 207; 311\right]$ &  $\left[ 218; 300\right]$ \tabularnewline \hline
+14 &  23 &  $\left[ 169; 363\right]$ &  $\left[ 184; 348\right]$ &  $\left[ 192; 340\right]$ &  $\left[ 203; 329\right]$ &  $\left[ 212; 320\right]$ &  $\left[ 224; 308\right]$ \tabularnewline \hline
+14 &  24 &  $\left[ 173; 373\right]$ &  $\left[ 188; 358\right]$ &  $\left[ 196; 350\right]$ &  $\left[ 207; 339\right]$ &  $\left[ 218; 328\right]$ &  $\left[ 229; 317\right]$ \tabularnewline \hline
+14 &  25 &  $\left[ 177; 383\right]$ &  $\left[ 192; 368\right]$ &  $\left[ 200; 360\right]$ &  $\left[ 212; 348\right]$ &  $\left[ 223; 337\right]$ &  $\left[ 235; 325\right]$ \tabularnewline \hline
+15 &  15 &  $\left[ 160; 305\right]$ &  $\left[ 171; 294\right]$ &  $\left[ 176; 289\right]$ &  $\left[ 184; 281\right]$ &  $\left[ 192; 273\right]$ &  $\left[ 200; 265\right]$ \tabularnewline \hline
+15 &  16 &  $\left[ 163; 317\right]$ &  $\left[ 175; 305\right]$ &  $\left[ 181; 299\right]$ &  $\left[ 190; 290\right]$ &  $\left[ 197; 283\right]$ &  $\left[ 206; 274\right]$ \tabularnewline \hline
+15 &  17 &  $\left[ 167; 328\right]$ &  $\left[ 180; 315\right]$ &  $\left[ 186; 309\right]$ &  $\left[ 195; 300\right]$ &  $\left[ 203; 292\right]$ &  $\left[ 212; 283\right]$ \tabularnewline \hline
+15 &  18 &  $\left[ 171; 339\right]$ &  $\left[ 184; 326\right]$ &  $\left[ 190; 320\right]$ &  $\left[ 200; 310\right]$ &  $\left[ 208; 302\right]$ &  $\left[ 218; 292\right]$ \tabularnewline \hline
+15 &  19 &  $\left[ 175; 350\right]$ &  $\left[ 189; 336\right]$ &  $\left[ 195; 330\right]$ &  $\left[ 205; 320\right]$ &  $\left[ 214; 311\right]$ &  $\left[ 224; 301\right]$ \tabularnewline \hline
+15 &  20 &  $\left[ 179; 361\right]$ &  $\left[ 193; 347\right]$ &  $\left[ 200; 340\right]$ &  $\left[ 210; 330\right]$ &  $\left[ 220; 320\right]$ &  $\left[ 230; 310\right]$ \tabularnewline \hline
+15 &  21 &  $\left[ 183; 372\right]$ &  $\left[ 198; 357\right]$ &  $\left[ 205; 350\right]$ &  $\left[ 216; 339\right]$ &  $\left[ 225; 330\right]$ &  $\left[ 236; 319\right]$ \tabularnewline \hline
+15 &  22 &  $\left[ 187; 383\right]$ &  $\left[ 202; 368\right]$ &  $\left[ 210; 360\right]$ &  $\left[ 221; 349\right]$ &  $\left[ 231; 339\right]$ &  $\left[ 242; 328\right]$ \tabularnewline \hline
+15 &  23 &  $\left[ 191; 394\right]$ &  $\left[ 207; 378\right]$ &  $\left[ 214; 371\right]$ &  $\left[ 226; 359\right]$ &  $\left[ 236; 349\right]$ &  $\left[ 248; 337\right]$ \tabularnewline \hline
+15 &  24 &  $\left[ 195; 405\right]$ &  $\left[ 211; 389\right]$ &  $\left[ 219; 381\right]$ &  $\left[ 231; 369\right]$ &  $\left[ 242; 358\right]$ &  $\left[ 254; 346\right]$ \tabularnewline \hline
+15 &  25 &  $\left[ 199; 416\right]$ &  $\left[ 216; 399\right]$ &  $\left[ 224; 391\right]$ &  $\left[ 237; 378\right]$ &  $\left[ 248; 367\right]$ &  $\left[ 260; 355\right]$ \tabularnewline \hline
+16 &  16 &  $\left[ 184; 344\right]$ &  $\left[ 196; 332\right]$ &  $\left[ 202; 326\right]$ &  $\left[ 211; 317\right]$ &  $\left[ 219; 309\right]$ &  $\left[ 229; 299\right]$ \tabularnewline \hline
+16 &  17 &  $\left[ 188; 356\right]$ &  $\left[ 201; 343\right]$ &  $\left[ 207; 337\right]$ &  $\left[ 217; 327\right]$ &  $\left[ 225; 319\right]$ &  $\left[ 235; 309\right]$ \tabularnewline \hline
+16 &  18 &  $\left[ 192; 368\right]$ &  $\left[ 206; 354\right]$ &  $\left[ 212; 348\right]$ &  $\left[ 222; 338\right]$ &  $\left[ 231; 329\right]$ &  $\left[ 242; 318\right]$ \tabularnewline \hline
+16 &  19 &  $\left[ 196; 380\right]$ &  $\left[ 210; 366\right]$ &  $\left[ 218; 358\right]$ &  $\left[ 228; 348\right]$ &  $\left[ 237; 339\right]$ &  $\left[ 248; 328\right]$ \tabularnewline \hline
+16 &  20 &  $\left[ 201; 391\right]$ &  $\left[ 215; 377\right]$ &  $\left[ 223; 369\right]$ &  $\left[ 234; 358\right]$ &  $\left[ 243; 349\right]$ &  $\left[ 255; 337\right]$ \tabularnewline \hline
+16 &  21 &  $\left[ 205; 403\right]$ &  $\left[ 220; 388\right]$ &  $\left[ 228; 380\right]$ &  $\left[ 239; 369\right]$ &  $\left[ 249; 359\right]$ &  $\left[ 261; 347\right]$ \tabularnewline \hline
+16 &  22 &  $\left[ 209; 415\right]$ &  $\left[ 225; 399\right]$ &  $\left[ 233; 391\right]$ &  $\left[ 245; 379\right]$ &  $\left[ 255; 369\right]$ &  $\left[ 267; 357\right]$ \tabularnewline \hline
+16 &  23 &  $\left[ 214; 426\right]$ &  $\left[ 230; 410\right]$ &  $\left[ 238; 402\right]$ &  $\left[ 251; 389\right]$ &  $\left[ 261; 379\right]$ &  $\left[ 274; 366\right]$ \tabularnewline \hline
+16 &  24 &  $\left[ 218; 438\right]$ &  $\left[ 235; 421\right]$ &  $\left[ 244; 412\right]$ &  $\left[ 256; 400\right]$ &  $\left[ 267; 389\right]$ &  $\left[ 280; 376\right]$ \tabularnewline \hline
+16 &  25 &  $\left[ 222; 450\right]$ &  $\left[ 240; 432\right]$ &  $\left[ 249; 423\right]$ &  $\left[ 262; 410\right]$ &  $\left[ 273; 399\right]$ &  $\left[ 287; 385\right]$ \tabularnewline \hline
+17 &  17 &  $\left[ 210; 385\right]$ &  $\left[ 223; 372\right]$ &  $\left[ 230; 365\right]$ &  $\left[ 240; 355\right]$ &  $\left[ 249; 346\right]$ &  $\left[ 259; 336\right]$ \tabularnewline \hline
+17 &  18 &  $\left[ 214; 398\right]$ &  $\left[ 228; 384\right]$ &  $\left[ 235; 377\right]$ &  $\left[ 246; 366\right]$ &  $\left[ 255; 357\right]$ &  $\left[ 266; 346\right]$ \tabularnewline \hline
+17 &  19 &  $\left[ 219; 410\right]$ &  $\left[ 234; 395\right]$ &  $\left[ 241; 388\right]$ &  $\left[ 252; 377\right]$ &  $\left[ 262; 367\right]$ &  $\left[ 273; 356\right]$ \tabularnewline \hline
+17 &  20 &  $\left[ 223; 423\right]$ &  $\left[ 239; 407\right]$ &  $\left[ 246; 400\right]$ &  $\left[ 258; 388\right]$ &  $\left[ 268; 378\right]$ &  $\left[ 280; 366\right]$ \tabularnewline \hline
+17 &  21 &  $\left[ 228; 435\right]$ &  $\left[ 244; 419\right]$ &  $\left[ 252; 411\right]$ &  $\left[ 264; 399\right]$ &  $\left[ 274; 389\right]$ &  $\left[ 287; 376\right]$ \tabularnewline \hline
+17 &  22 &  $\left[ 233; 447\right]$ &  $\left[ 249; 431\right]$ &  $\left[ 258; 422\right]$ &  $\left[ 270; 410\right]$ &  $\left[ 281; 399\right]$ &  $\left[ 294; 386\right]$ \tabularnewline \hline
+17 &  23 &  $\left[ 238; 459\right]$ &  $\left[ 255; 442\right]$ &  $\left[ 263; 434\right]$ &  $\left[ 276; 421\right]$ &  $\left[ 287; 410\right]$ &  $\left[ 300; 397\right]$ \tabularnewline \hline
+17 &  24 &  $\left[ 242; 472\right]$ &  $\left[ 260; 454\right]$ &  $\left[ 269; 445\right]$ &  $\left[ 282; 432\right]$ &  $\left[ 294; 420\right]$ &  $\left[ 307; 407\right]$ \tabularnewline \hline
+17 &  25 &  $\left[ 247; 484\right]$ &  $\left[ 265; 466\right]$ &  $\left[ 275; 456\right]$ &  $\left[ 288; 443\right]$ &  $\left[ 300; 431\right]$ &  $\left[ 314; 417\right]$ \tabularnewline \hline
+18 &  18 &  $\left[ 237; 429\right]$ &  $\left[ 252; 414\right]$ &  $\left[ 259; 407\right]$ &  $\left[ 270; 396\right]$ &  $\left[ 280; 386\right]$ &  $\left[ 291; 375\right]$ \tabularnewline \hline
+18 &  19 &  $\left[ 242; 442\right]$ &  $\left[ 258; 426\right]$ &  $\left[ 265; 419\right]$ &  $\left[ 277; 407\right]$ &  $\left[ 287; 397\right]$ &  $\left[ 299; 385\right]$ \tabularnewline \hline
+18 &  20 &  $\left[ 247; 455\right]$ &  $\left[ 263; 439\right]$ &  $\left[ 271; 431\right]$ &  $\left[ 283; 419\right]$ &  $\left[ 294; 408\right]$ &  $\left[ 306; 396\right]$ \tabularnewline \hline
+18 &  21 &  $\left[ 252; 468\right]$ &  $\left[ 269; 451\right]$ &  $\left[ 277; 443\right]$ &  $\left[ 290; 430\right]$ &  $\left[ 301; 419\right]$ &  $\left[ 313; 407\right]$ \tabularnewline \hline
+18 &  22 &  $\left[ 257; 481\right]$ &  $\left[ 275; 463\right]$ &  $\left[ 283; 455\right]$ &  $\left[ 296; 442\right]$ &  $\left[ 307; 431\right]$ &  $\left[ 321; 417\right]$ \tabularnewline \hline
+18 &  23 &  $\left[ 262; 494\right]$ &  $\left[ 280; 476\right]$ &  $\left[ 289; 467\right]$ &  $\left[ 303; 453\right]$ &  $\left[ 314; 442\right]$ &  $\left[ 328; 428\right]$ \tabularnewline \hline
+18 &  24 &  $\left[ 267; 507\right]$ &  $\left[ 286; 488\right]$ &  $\left[ 295; 479\right]$ &  $\left[ 309; 465\right]$ &  $\left[ 321; 453\right]$ &  $\left[ 335; 439\right]$ \tabularnewline \hline
+18 &  25 &  $\left[ 273; 519\right]$ &  $\left[ 292; 500\right]$ &  $\left[ 301; 491\right]$ &  $\left[ 316; 476\right]$ &  $\left[ 328; 464\right]$ &  $\left[ 343; 449\right]$ \tabularnewline \hline
+19 &  19 &  $\left[ 267; 474\right]$ &  $\left[ 283; 458\right]$ &  $\left[ 291; 450\right]$ &  $\left[ 303; 438\right]$ &  $\left[ 313; 428\right]$ &  $\left[ 325; 416\right]$ \tabularnewline \hline
+19 &  20 &  $\left[ 272; 488\right]$ &  $\left[ 289; 471\right]$ &  $\left[ 297; 463\right]$ &  $\left[ 309; 451\right]$ &  $\left[ 320; 440\right]$ &  $\left[ 333; 427\right]$ \tabularnewline \hline
+19 &  21 &  $\left[ 277; 502\right]$ &  $\left[ 295; 484\right]$ &  $\left[ 303; 476\right]$ &  $\left[ 316; 463\right]$ &  $\left[ 328; 451\right]$ &  $\left[ 341; 438\right]$ \tabularnewline \hline
+19 &  22 &  $\left[ 283; 515\right]$ &  $\left[ 301; 497\right]$ &  $\left[ 310; 488\right]$ &  $\left[ 323; 475\right]$ &  $\left[ 335; 463\right]$ &  $\left[ 349; 449\right]$ \tabularnewline \hline
+19 &  23 &  $\left[ 288; 529\right]$ &  $\left[ 307; 510\right]$ &  $\left[ 316; 501\right]$ &  $\left[ 330; 487\right]$ &  $\left[ 342; 475\right]$ &  $\left[ 357; 460\right]$ \tabularnewline \hline
+19 &  24 &  $\left[ 294; 542\right]$ &  $\left[ 313; 523\right]$ &  $\left[ 323; 513\right]$ &  $\left[ 337; 499\right]$ &  $\left[ 350; 486\right]$ &  $\left[ 364; 472\right]$ \tabularnewline \hline
+19 &  25 &  $\left[ 299; 556\right]$ &  $\left[ 319; 536\right]$ &  $\left[ 329; 526\right]$ &  $\left[ 344; 511\right]$ &  $\left[ 357; 498\right]$ &  $\left[ 372; 483\right]$ \tabularnewline \hline
+20 &  20 &  $\left[ 298; 522\right]$ &  $\left[ 315; 505\right]$ &  $\left[ 324; 496\right]$ &  $\left[ 337; 483\right]$ &  $\left[ 348; 472\right]$ &  $\left[ 361; 459\right]$ \tabularnewline \hline
+20 &  21 &  $\left[ 304; 536\right]$ &  $\left[ 322; 518\right]$ &  $\left[ 331; 509\right]$ &  $\left[ 344; 496\right]$ &  $\left[ 356; 484\right]$ &  $\left[ 370; 470\right]$ \tabularnewline \hline
+20 &  22 &  $\left[ 309; 551\right]$ &  $\left[ 328; 532\right]$ &  $\left[ 337; 523\right]$ &  $\left[ 351; 509\right]$ &  $\left[ 364; 496\right]$ &  $\left[ 378; 482\right]$ \tabularnewline \hline
+20 &  23 &  $\left[ 315; 565\right]$ &  $\left[ 335; 545\right]$ &  $\left[ 344; 536\right]$ &  $\left[ 359; 521\right]$ &  $\left[ 371; 509\right]$ &  $\left[ 386; 494\right]$ \tabularnewline \hline
+20 &  24 &  $\left[ 321; 579\right]$ &  $\left[ 341; 559\right]$ &  $\left[ 351; 549\right]$ &  $\left[ 366; 534\right]$ &  $\left[ 379; 521\right]$ &  $\left[ 394; 506\right]$ \tabularnewline \hline
+20 &  25 &  $\left[ 327; 593\right]$ &  $\left[ 348; 572\right]$ &  $\left[ 358; 562\right]$ &  $\left[ 373; 547\right]$ &  $\left[ 387; 533\right]$ &  $\left[ 403; 517\right]$ \tabularnewline \hline
+21 &  21 &  $\left[ 331; 572\right]$ &  $\left[ 349; 554\right]$ &  $\left[ 359; 544\right]$ &  $\left[ 373; 530\right]$ &  $\left[ 385; 518\right]$ &  $\left[ 399; 504\right]$ \tabularnewline \hline
+21 &  22 &  $\left[ 337; 587\right]$ &  $\left[ 356; 568\right]$ &  $\left[ 366; 558\right]$ &  $\left[ 381; 543\right]$ &  $\left[ 393; 531\right]$ &  $\left[ 408; 516\right]$ \tabularnewline \hline
+21 &  23 &  $\left[ 343; 602\right]$ &  $\left[ 363; 582\right]$ &  $\left[ 373; 572\right]$ &  $\left[ 388; 557\right]$ &  $\left[ 401; 544\right]$ &  $\left[ 417; 528\right]$ \tabularnewline \hline
+21 &  24 &  $\left[ 349; 617\right]$ &  $\left[ 370; 596\right]$ &  $\left[ 381; 585\right]$ &  $\left[ 396; 570\right]$ &  $\left[ 410; 556\right]$ &  $\left[ 425; 541\right]$ \tabularnewline \hline
+21 &  25 &  $\left[ 356; 631\right]$ &  $\left[ 377; 610\right]$ &  $\left[ 388; 599\right]$ &  $\left[ 404; 583\right]$ &  $\left[ 418; 569\right]$ &  $\left[ 434; 553\right]$ \tabularnewline \hline
+22 &  22 &  $\left[ 365; 625\right]$ &  $\left[ 386; 604\right]$ &  $\left[ 396; 594\right]$ &  $\left[ 411; 579\right]$ &  $\left[ 424; 566\right]$ &  $\left[ 439; 551\right]$ \tabularnewline \hline
+22 &  23 &  $\left[ 372; 640\right]$ &  $\left[ 393; 619\right]$ &  $\left[ 403; 609\right]$ &  $\left[ 419; 593\right]$ &  $\left[ 432; 580\right]$ &  $\left[ 448; 564\right]$ \tabularnewline \hline
+22 &  24 &  $\left[ 379; 655\right]$ &  $\left[ 400; 634\right]$ &  $\left[ 411; 623\right]$ &  $\left[ 427; 607\right]$ &  $\left[ 441; 593\right]$ &  $\left[ 457; 577\right]$ \tabularnewline \hline
+22 &  25 &  $\left[ 385; 671\right]$ &  $\left[ 408; 648\right]$ &  $\left[ 419; 637\right]$ &  $\left[ 435; 621\right]$ &  $\left[ 450; 606\right]$ &  $\left[ 467; 589\right]$ \tabularnewline \hline
+23 &  23 &  $\left[ 402; 679\right]$ &  $\left[ 424; 657\right]$ &  $\left[ 434; 647\right]$ &  $\left[ 451; 630\right]$ &  $\left[ 465; 616\right]$ &  $\left[ 481; 600\right]$ \tabularnewline \hline
+23 &  24 &  $\left[ 402; 702\right]$ &  $\left[ 431; 673\right]$ &  $\left[ 443; 661\right]$ &  $\left[ 459; 645\right]$ &  $\left[ 474; 630\right]$ &  $\left[ 491; 613\right]$ \tabularnewline \hline
+23 &  25 &  $\left[ 416; 711\right]$ &  $\left[ 439; 688\right]$ &  $\left[ 451; 676\right]$ &  $\left[ 468; 659\right]$ &  $\left[ 483; 644\right]$ &  $\left[ 500; 627\right]$ \tabularnewline \hline
+24 &  24 &  $\left[ 440; 736\right]$ &  $\left[ 464; 712\right]$ &  $\left[ 475; 701\right]$ &  $\left[ 492; 684\right]$ &  $\left[ 507; 669\right]$ &  $\left[ 525; 651\right]$ \tabularnewline \hline
+24 &  25 &  $\left[ 448; 752\right]$ &  $\left[ 472; 728\right]$ &  $\left[ 484; 716\right]$ &  $\left[ 501; 699\right]$ &  $\left[ 517; 683\right]$ &  $\left[ 535; 665\right]$ \tabularnewline \hline
+25 &  25 &  $\left[ 480; 795\right]$ &  $\left[ 505; 770\right]$ &  $\left[ 517; 758\right]$ &  $\left[ 536; 739\right]$ &  $\left[ 552; 723\right]$ &  $\left[ 570; 705\right]$ \tabularnewline \hline
+\end{longtable}
+}
+\end{center}
+
+% Список литературы
+\addcontentsline{toc}{section}{Список литературы}
+\bibliographystyle{utf8gost705u}  %% стилевой файл для оформления по ГОСТу
+\bibliography{biblio}     %% имя библиографической базы (bib-файла)
+\newpage
+
+\end{document}
