@@ -181,19 +181,19 @@ Q &=& 0.2.\nonumber
 
 Если $m > 25$ или  $n > 25$ (при этом $m,n \geq 5$), то используем приближенные формулы  \cite[с. 95]{book:Bolshev1983}:
 \begin{eqnarray}
-W_{Left}&\approx& int \left( \dfrac{m\left( m+n+1\right)-1 }{2} - \Psi\left( 1-Q\right)\cdot\sqrt{\dfrac{mn\left( m+n+1\right) }{12}} \right);\\
+W_{Left}&\approx& int \left( \dfrac{m\left( m+n+1\right)-1 }{2} - \Psi\left( 1-0.5Q\right)\cdot\sqrt{\dfrac{mn\left( m+n+1\right) }{12}} \right);\\
 W_{Right}&\approx& m\left( m+n+1\right) - W_{Left}.
 \end{eqnarray}
 
-Тут $ \Psi\left( 1-Q\right) $ --- значение обратной функции нормального распределения с параметрами $ \left( 0, 1\right)  $. Так как мы рассматриваем шесть различных уровня значимости, то ниже даны значения $ \Psi\left( 1-Q\right) $ для этих шести значений $Q$\cite[с. 136]{book:Bolshev1983}:
+Тут $ \Psi\left( 1-0.5Q\right) $ --- значение обратной функции нормального распределения с параметрами $ \left( 0, 1\right)  $. Так как мы рассматриваем шесть различных уровня значимости, то ниже даны значения $ \Psi\left( 1-Q\right) $ для этих шести значений $Q$\cite[с. 136]{book:Bolshev1983}:
 \begin{eqnarray}
 \label{WilcoxonW:eq:Psi}
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.002\right) =\Psi\left( 0.999\right) = 3.090232;\\
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.010 \right) =\Psi\left( 0.995\right) =  2.575829; \nonumber\\
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.020\right) =\Psi\left( 0.990\right) = 2.326348 ; \nonumber\\
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.050\right) = \Psi\left( 0.975\right) = 1.959964;\nonumber\\ 
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.100\right) =  \Psi\left( 0.950\right) = 1.644854;\nonumber\\
-\Psi\left( 1-Q\right) &=& \Psi\left( 1-0.200\right) = \Psi\left( 0.900\right) = 1.281552.\nonumber
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.002\right) =\Psi\left( 0.999\right) = 3.090232;\\
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.010 \right) =\Psi\left( 0.995\right) =  2.575829; \nonumber\\
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.020\right) =\Psi\left( 0.990\right) = 2.326348 ; \nonumber\\
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.050\right) = \Psi\left( 0.975\right) = 1.959964;\nonumber\\ 
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.100\right) =  \Psi\left( 0.950\right) = 1.644854;\nonumber\\
+\Psi\left( 1-0.5Q\right) &=& \Psi\left( 1-0.5\cdot0.200\right) = \Psi\left( 0.900\right) = 1.281552.\nonumber
 \end{eqnarray}
 
 Обратите внимание, что для случая, когда $m > 25$, а  $n < 5$ (или наоборот), в данной работе не приводятся данные о сравнении таких выборок. Табличные данные отсутствуют, а предложенные формулы недостаточно точны для таких объемов выборок. 
