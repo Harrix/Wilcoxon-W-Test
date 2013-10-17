@@ -7,7 +7,7 @@ Wilcoxon-W-Test
 
 https://github.com/Harrix/Wilcoxon-W-Test
 
-Файл распространяется по лицензии Apache License, Version 2.0.
+Файл распространяется по лицензии [Apache License, Version 2.0](../master/LICENSE.txt).
 
 Сам стандарт находится в файле **_Wilcoxon-W-Test.pdf**.
 
