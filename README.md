@@ -27,7 +27,7 @@ https://github.com/Harrix/Wilcoxon-W-Test
 
 В корневой папке находятся две папки. 
 
-В папке [**Source**](../master/Source) располагаются файлы непосредственно документа, где находится файл [**_Wilcoxon-W-Test.tex**](../master/_Wilcoxon-W-Test.tex) (это исходник pdf документа) и файлы, которые являются вызываемыми или вспомогательными для [**_Wilcoxon-W-Test.tex**](../master/_Wilcoxon-W-Test.tex).
+В папке [**Source**](../master/Source) располагаются файлы непосредственно документа, где находится файл [**_Wilcoxon-W-Test.tex**](../master/Source/_Wilcoxon-W-Test.tex) (это исходник pdf документа) и файлы, которые являются вызываемыми или вспомогательными для [**_Wilcoxon-W-Test.tex**](../master/Source/_Wilcoxon-W-Test.tex).
 
 В папке [**images**](../master/images) находятся служебные рисунки для отображения в этом файле.
 
