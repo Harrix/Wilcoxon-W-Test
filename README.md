@@ -9,7 +9,7 @@ https://github.com/Harrix/Wilcoxon-W-Test
 
 Файл распространяется по лицензии [Apache License, Version 2.0](../master/LICENSE.txt).
 
-Сам стандарт находится в файле [**_Wilcoxon-W-Test.pdf**](../master/_Wilcoxon-W-Test.pdf).
+Непосредственно главный файл: [**_Wilcoxon-W-Test.pdf**](../master/_Wilcoxon-W-Test.pdf).
 
 Прямая ссылка на скачивание: [**_Wilcoxon-W-Test.pdf**](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/_Wilcoxon-W-Test.pdf).
 
