@@ -11,6 +11,8 @@ https://github.com/Harrix/Wilcoxon-W-Test
 
 Сам стандарт находится в файле [**_Wilcoxon-W-Test.pdf**](../master/_Wilcoxon-W-Test.pdf).
 
+Прямая ссылка на скачивание: [**_Wilcoxon-W-Test.pdf**](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/_Wilcoxon-W-Test.pdf).
+
 В данном документе дано описание критерия Вилкосона W по справочнику «Таблицы математической статистики» (Большев Л. Н., Смирнов Н. В.) и методика его применения.
 
 Скриншоты документа
