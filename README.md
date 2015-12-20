@@ -32,7 +32,7 @@ Wilcoxon-W-Test
 
 Файл [**_Wilcoxon-W-Test.pdf**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/_Wilcoxon-W-Test.pdf) - это непосредственно сам документ "Критерий Вилкоксона W для проверки однородности выборок".
 
-В корневой папке находятся две папки. 
+В корневой папке находятся две папки.
 
 В папке [**Source**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/Source) располагаются файлы непосредственно документа, где находится файл [**_Wilcoxon-W-Test.tex**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/Source/_Wilcoxon-W-Test.tex) (это исходник pdf документа) и файлы, которые являются вызываемыми или вспомогательными для [**_Wilcoxon-W-Test.tex**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/Source/_Wilcoxon-W-Test.tex).
 
@@ -41,7 +41,7 @@ Wilcoxon-W-Test
 Сведения для редактирования файлов
 ----------------------------------
 
-Для полноценной работы редактированию LaTeX документа вам потребуются программа для компиляции \*.tex документов в \*.pdf. Автор использует для этого связку [MiKTex](http://www.miktex.org/) и [TeXstudio](http://texstudio.sourceforge.net/). 
+Для полноценной работы редактированию LaTeX документа вам потребуются программа для компиляции \*.tex документов в \*.pdf. Автор использует для этого связку [MiKTex](http://www.miktex.org/) и [TeXstudio](http://texstudio.sourceforge.net/).
 
 В варианте, который использует автор, в \*.tex файлах справок для отображения русских букв используется модуль **pscyr**. Об его установке можно прочитать (и скачать) в статье [http://blog.harrix.org/?p=444](http://blog.harrix.org/?p=444).
 
@@ -76,9 +76,8 @@ Title
 - Code form math.h
 
 ```cpp
-int HQt_CountOfRowsFromQStringList(QStringList QStringListFromFile);
-int HQt_CountOfRowsFromQStringList(QStringList QStringListFromFile, int k);
-int HQt_CountOfRowsFromQStringList(QStringList QStringListFromFile, int *VHQt_ResultVector);
+int HQt_Co(QStringList QStringListFromFile);
+int HQt_Co(QStringList QStringListFromFile, int k);
 ```
 
-Text
+Text before.
