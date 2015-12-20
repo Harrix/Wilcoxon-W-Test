@@ -78,8 +78,6 @@ Title
 ```cpp
 /* END FLOAT.H COPY */
 
-#if !defined(NO_OLDNAMES)
-
 _CRTIMP double __cdecl j0 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
 _CRTIMP double __cdecl j1 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
 _CRTIMP double __cdecl jn (int, double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
