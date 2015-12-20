@@ -66,3 +66,38 @@ Wilcoxon-W-Test
 С автором можно связаться по адресу [sergienkoanton@mail.ru](mailto:sergienkoanton@mail.ru) или  [http://vk.com/harrix](http://vk.com/harrix).
 
 Сайт автора, где публикуются последние новости: [http://blog.harrix.org](http://blog.harrix.org), а проекты располагаются по адресу: [http://harrix.org](http://harrix.org).
+
+Markdown File
+==============
+
+Title
+-----
+
+- Code form math.h
+
+```cpp
+/* END FLOAT.H COPY */
+
+#if !defined(NO_OLDNAMES)
+
+_CRTIMP double __cdecl j0 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+_CRTIMP double __cdecl j1 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+_CRTIMP double __cdecl jn (int, double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+_CRTIMP double __cdecl y0 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+_CRTIMP double __cdecl y1 (double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+_CRTIMP double __cdecl yn (int, double) __MINGW_ATTRIB_DEPRECATED_MSVC2005;
+
+_CRTIMP double __cdecl chgsign (double);
+/*
+ * scalb() is a GCC built-in.
+ * Exclude this _scalb() stub; the semantics are incompatible
+ * with the built-in implementation.
+ *
+_CRTIMP double __cdecl scalb (double, long);
+ *
+ */
+  _CRTIMP int __cdecl finite (double);
+  _CRTIMP int __cdecl fpclass (double);
+```
+
+Text
