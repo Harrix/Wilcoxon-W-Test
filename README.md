@@ -7,7 +7,7 @@ Wilcoxon-W-Test
 
 [https://github.com/Harrix/Wilcoxon-W-Test](Wilcoxon-W-Test)
 
-Файл распространяется по лицензии [MIT](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/LICENSE).
+Файл распространяется по лицензии [CC BY 4.0](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/LICENSE.md).
 
 Непосредственно главный файл: [**_Wilcoxon-W-Test.pdf**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/_Wilcoxon-W-Test.pdf).
 
