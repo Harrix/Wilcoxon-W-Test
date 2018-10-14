@@ -1,5 +1,4 @@
-Wilcoxon-W-Test
-===============
+# Wilcoxon-W-Test
 
 Версия 1.2
 
@@ -15,20 +14,17 @@ Wilcoxon-W-Test
 
 В данном документе дано описание критерия Вилкосона W по справочнику «Таблицы математической статистики» (Большев Л. Н., Смирнов Н. В.) и методика его применения.
 
-Установка
----------
+## Установка
 
 Прочитать подробно об установке можно тут [http://blog.harrix.org/?p=1216](http://blog.harrix.org/?p=1216).
 
-Скриншоты документа
--------------------
+## Скриншоты документа
 
-![alt text](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/images/title.png "Первая страница _Wilcoxon-W-Test.pdf")
+![Первая страница _Wilcoxon-W-Test.pdf](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/images/title.png)
 
-![alt text](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/images/table.png "Пример части таблицы из _Wilcoxon-W-Test.pdf")
+![Пример части таблицы из _Wilcoxon-W-Test.pdf](https://raw.github.com/Harrix/Wilcoxon-W-Test/master/images/table.png)
 
-Про структуру проекта
----------------------
+## Про структуру проекта
 
 Файл [**_Wilcoxon-W-Test.pdf**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/_Wilcoxon-W-Test.pdf) - это непосредственно сам документ "Критерий Вилкоксона W для проверки однородности выборок".
 
@@ -38,8 +34,7 @@ Wilcoxon-W-Test
 
 В папке [**images**](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/images) находятся служебные рисунки для отображения в этом файле.
 
-Сведения для редактирования файлов
-----------------------------------
+## Сведения для редактирования файлов
 
 Для полноценной работы редактированию LaTeX документа вам потребуются программа для компиляции \*.tex документов в \*.pdf. Автор использует для этого связку [MiKTex](http://www.miktex.org/) и [TeXstudio](http://texstudio.sourceforge.net/).
 
@@ -47,19 +42,16 @@ Wilcoxon-W-Test
 
 Подробное описание установки и настройки связки MiKTeX + TeXstudio + pscyr можно прочитать в статье [http://blog.harrix.org/?p=849](http://blog.harrix.org/?p=849).
 
-Использованные технологии
--------------------------
+## Использованные технологии
 
 - [LaTeX](http://ru.wikipedia.org/wiki/LaTeX), [MiKTeX](http://miktex.org/), [BiBTex](http://ru.wikipedia.org/wiki/BibTeX), [TeXstudio](http://texstudio.sourceforge.net/), [PSCyr]([http://blog.harrix.org/?p=444](http://blog.harrix.org/?p=444)).
 - [HarrixLaTeXDocumentTemplate](https://github.com/Harrix/HarrixLaTeXDocumentTemplate).
 
-История проекта
----------------
+## История проекта
 
 Подробный список изменений в файле [CHANGELOG.md](https://github.com/Harrix/Wilcoxon-W-Test/blob/master/CHANGELOG.md).
 
-Контакты
---------
+## Контакты
 
 Автор: Сергиенко Антон Борисович.
 
